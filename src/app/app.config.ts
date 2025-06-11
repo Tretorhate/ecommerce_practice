@@ -9,10 +9,12 @@ import {
 
 import { providePrimeNG } from 'primeng/config';
 import Material from '@primeng/themes/material';
+import { provideHttpClient } from '@angular/common/http';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
+    provideHttpClient(),
     provideRouter(routes),
     provideClientHydration(withEventReplay()),
     providePrimeNG({
