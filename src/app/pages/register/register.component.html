@@ -1,1 +1,71 @@
-<p>register works!</p>
+<app-auth-layout>
+  <form (ngSubmit)="onSubmit()" [formGroup]="registerForm" class="w-full px-3">
+    <h1 class="text-xl my-3 font-bold">Register</h1>
+    <div class="grid items-center gap-3">
+      <p-floatlabel variant="on">
+        <input
+          fluid
+          pInputText
+          id="name"
+          formControlName="name"
+          autocomplete="off"
+          pSize="small"
+        />
+        <label for="on_label">Name</label>
+      </p-floatlabel>
+
+      <p-floatlabel variant="on">
+        <input
+          fluid
+          formControlName="email"
+          type="email"
+          pInputText
+          id="email"
+          autocomplete="off"
+          pSize="small"
+        />
+        <label for="on_label">Email</label>
+      </p-floatlabel>
+
+      <p-floatlabel variant="on">
+        <input
+          fluid
+          pInputText
+          id="password"
+          autocomplete="off"
+          pSize="small"
+          type="password"
+          formControlName="password"
+        />
+        <label for="on_label">Password</label>
+      </p-floatlabel>
+
+      <p-floatlabel variant="on">
+        <input
+          fluid
+          pInputText
+          id="repeatpassword"
+          autocomplete="off"
+          type="password"
+          pSize="small"
+          formControlName="repeatpassword"
+        />
+        <label for="on_label">Repeat password</label>
+      </p-floatlabel>
+    </div>
+    <div class="mt-4 flex items-center justify-between text-gray-300">
+      <p-button
+        class="block"
+        size="small"
+        label="Register"
+        [disabled]="registerForm.invalid"
+        type="submit"
+      />
+
+      <span
+        >Already have account ?
+        <a routerLink="/login" class="underline">Login</a></span
+      >
+    </div>
+  </form>
+</app-auth-layout>
