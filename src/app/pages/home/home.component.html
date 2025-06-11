@@ -1,6 +1,6 @@
 <p>home works!</p>
+<div class="p-4">
+  <button class="px-4 py-2 bg-blue-500 text-white rounded" (click)="cartSidebar.openSidebar()">Открыть корзину</button>
+</div>
 
-<app-cart-card
-  *ngFor="let product of products"
-  [product]="product">
-</app-cart-card>
+<app-cart-sidebar #cartSidebar [products]="products"></app-cart-sidebar>

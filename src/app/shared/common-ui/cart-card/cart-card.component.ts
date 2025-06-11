@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input} from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 
 @Component({
   selector: 'app-cart-card',
@@ -8,19 +8,25 @@ import { Component, Input} from '@angular/core';
   templateUrl: './cart-card.component.html'
 })
 export class CartCardComponent {
-  @Input() product!: { name: string; price: number; image: string };
-  quantity = 1;
+  @Input() product!: { name: string; price: number; image: string; quantity: number };
+  @Output() quantityChange = new EventEmitter<number>();
+  @Output() removeProduct = new EventEmitter<void>();
 
   get totalPrice(): number {
-    return this.product.price * this.quantity;
+    return this.product.price * this.product.quantity;
   }
 
   increment() {
-    this.quantity++;
+    this.product.quantity++;
+    this.quantityChange.emit(this.product.quantity);
   }
 
   decrement() {
-    if (this.quantity > 1) this.quantity--;
+    if (this.product.quantity > 1) {
+      this.product.quantity--;
+      this.quantityChange.emit(this.product.quantity);
+    } else {
+      this.removeProduct.emit(); // Уведомляем родителя о необходимости удаления продукта
+    }
   }
-  
 }

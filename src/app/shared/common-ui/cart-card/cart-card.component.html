@@ -1,13 +1,15 @@
-<div class="block mb-6">
-    <div class="flex gap-5 border border-[#ddd] p-4 rounded-none bg-white max-w-[700px] relative">
+<div class="block">
+    <div class="flex gap-5 border  p-4 rounded-none bg-white max-w-[700px] relative">
         <div class="shrink-0">
+        
+            <div class="w-full h-[1.2px] bg-white mb-2"></div>
         <img [src]="product.image" alt="product" class="w-[100px] h-auto" />
         </div>
 
         <div class="flex-grow">
         <div class="w-full h-[1.2px] bg-[#eae7e7] mb-2"></div>
 
-        <h3 class="text-[#007bff] text-base font-light m-0">{{ product.name }}</h3>
+        <h3 class="text-[#0089D0] text-base font-light m-0">{{ product.name }}</h3>
 
         <div class="grid grid-cols-[100px_150px] gap-1 text-sm my-2">
             <div class="text-[#888]">Цена</div>
@@ -28,9 +30,9 @@
         </div>
 
     <div class="absolute right-4 bottom-4 mt-3 flex items-center gap-2.5 text-[#333] text-xl font-bold">
-        <button (click)="decrement()" class="w-7 h-7 text-sm font-black border-4 border-[#333] bg-white rounded cursor-pointer">−</button>
-        <span>{{ quantity }}</span>
-        <button (click)="increment()" class="w-7 h-7 text-sm font-black border-4 border-[#333] bg-white rounded cursor-pointer">+</button>
+        <button (click)="decrement()" class="w-6.5 h-6.5 text-sm font-black border-4 border-[#333] bg-white rounded cursor-pointer">➖</button>
+        <span>{{ product.quantity }}</span>
+        <button (click)="increment()" class="w-6.5 h-6.5 text-sm font-black border-4 border-[#333] bg-white rounded cursor-pointer">➕</button>
     </div>
     </div>
 </div>
