@@ -1,0 +1,79 @@
+<div class="flex bg-white w-full overflow-y-auto" style="height: 60vh">
+  <!-- Left Sidebar (only when showSidebar) -->
+  @if (showSidebar) {
+  <div
+    class="w-64 bg-gray-50 border-r border-gray-200 min-h-full overflow-visible"
+  >
+    <div class="p-4">
+      @for (cat of mainCategories; track cat.id) {
+      <div
+        class="flex items-center justify-between p-3 mb-1 rounded cursor-pointer transition-colors"
+        [ngClass]="
+          activeCategory === cat.id
+            ? 'bg-blue-100 text-blue-600'
+            : 'hover:bg-gray-100 text-gray-700'
+        "
+        (mouseenter)="setActiveCategory(cat.id)"
+      >
+        <span class="text-sm font-medium">{{ cat.name }}</span>
+        <span class="pi pi-angle-right text-gray-400 text-xs"></span>
+      </div>
+      }
+    </div>
+  </div>
+  }
+
+  <!-- Main Content -->
+  <div [ngClass]="showSidebar ? 'flex-1 p-4' : 'w-full p-12'">
+    @if (currentCategory) {
+    <div>
+      <!-- Breadcrumb -->
+      <div class="flex items-center text-sm text-gray-500 mb-6">
+        <span>{{ currentCategory!.title }} </span>
+        <span class="pi pi-angle-right mx-2 text-xs"></span>
+      </div>
+
+      <h1 class="text-3xl font-bold text-gray-900 mb-8">
+        {{ currentCategory!.title }}
+      </h1>
+
+      <!-- Sections -->
+      <div class="flex flex-wrap gap-3 mb-8">
+        @for (sec of currentCategory!.sections ?? []; track sec.title) { @if
+        (sec.items == null) {
+        <div
+          class="text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded cursor-pointer transition-colors"
+        >
+          {{ sec.title }}
+        </div>
+        } }
+      </div>
+
+      <!-- Sections with items -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-8">
+        @for (sec of currentCategory!.sections ?? []; track sec.title) { @if
+        (sec.items) {
+        <div class="pr-8 border-r border-gray-200 last:border-none">
+          <h2 class="text-lg font-bold text-gray-900 mb-4">{{ sec.title }}</h2>
+          <div
+            class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-2"
+          >
+            @for (item of sec.items!; track item) {
+            <div
+              class="text-blue-600 hover:text-blue-800 cursor-pointer text-sm"
+            >
+              {{ item }}
+            </div>
+            }
+          </div>
+        </div>
+        } }
+      </div>
+    </div>
+    } @else {
+    <div class="text-gray-500 text-center py-12">
+      <p>Выберите категорию из меню слева</p>
+    </div>
+    }
+  </div>
+</div>
