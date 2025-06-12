@@ -3,6 +3,7 @@ import { RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-main-layout',
+  standalone:true, //i had to add this one, pls dont kill me
   imports: [RouterOutlet],
   template: `
     <header>Header content</header>
