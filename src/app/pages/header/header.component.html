@@ -1,4 +1,5 @@
 <header class="bg-white pt-2">
+  <app-cart-sidebar #cartSidebar [products]="products"></app-cart-sidebar>
   <section class="flex px-6 py-4 justify-around items-center">
     <!-- Left: Logo -->
     <img src="assets/svgs/Group.svg" alt="Group Icon" class="h-8" />
@@ -15,7 +16,11 @@
       <span class="text-sm">0</span>
       <span class="text-sm">KZT</span>
       <span class="pi pi-angle-down text-xl cursor-pointer"></span>
-      <span class="pi pi-shopping-cart text-xl cursor-pointer pl-4"></span>
+
+      <button
+        (click)="cartSidebar.openSidebar()"
+        class="pi pi-shopping-cart text-xl cursor-pointer pl-4"
+      ></button>
     </div>
   </section>
 
