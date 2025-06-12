@@ -1,13 +1,18 @@
 import { Routes } from '@angular/router';
+import { authGuard, authLoginGuard } from './shared/guards/auth-guard.guard';
 
 export const routes: Routes = [
   {
     path: 'login',
+    title: 'Login',
+    canActivate: [authLoginGuard],
     loadComponent: () =>
       import('./pages/login/login.component').then((m) => m.LoginComponent),
   },
   {
     path: 'register',
+    title: 'Register',
+    canActivate: [authLoginGuard],
     loadComponent: () =>
       import('./pages/register/register.component').then(
         (m) => m.RegisterComponent,
@@ -34,6 +39,7 @@ export const routes: Routes = [
           },
       {
         path: '**',
+        title: 'Not found',
         loadComponent: () =>
           import('./pages/notfound/notfound.component').then(
             (m) => m.NotfoundComponent,

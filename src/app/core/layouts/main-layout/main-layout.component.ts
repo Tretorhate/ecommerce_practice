@@ -1,9 +1,11 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { HeaderComponent } from '../../../pages/header/header.component';
+import { FooterComponent } from './../../../pages/footer/footer.component';
 
 @Component({
   selector: 'app-main-layout',
-  imports: [RouterOutlet],
+  imports: [RouterOutlet, FooterComponent, HeaderComponent],
   template: `
     <header>Header content</header>
     <main class="flex justify-center items-center min-h-[95svh] mt-5 bg-[#EEEEEE]">
