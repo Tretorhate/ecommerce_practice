@@ -1,8 +1,26 @@
 import { Routes } from '@angular/router';
+import { authGuard, authLoginGuard } from './shared/guards/auth-guard.guard';
 
 export const routes: Routes = [
   {
+    path: 'login',
+    title: 'Login',
+    canActivate: [authLoginGuard],
+    loadComponent: () =>
+      import('./pages/login/login.component').then((m) => m.LoginComponent),
+  },
+  {
+    path: 'register',
+    title: 'Register',
+    canActivate: [authLoginGuard],
+    loadComponent: () =>
+      import('./pages/register/register.component').then(
+        (m) => m.RegisterComponent,
+      ),
+  },
+  {
     path: '',
+
     loadComponent: () =>
       import('./core/layouts/main-layout/main-layout.component').then(
         (m) => m.MainLayout,
@@ -10,28 +28,18 @@ export const routes: Routes = [
     children: [
       {
         path: '',
+        title: 'Home page',
         loadComponent: () =>
           import('./pages/home/home.component').then((m) => m.HomeComponent),
       },
       {
         path: '**',
+        title: 'Not found',
         loadComponent: () =>
           import('./pages/notfound/notfound.component').then(
             (m) => m.NotfoundComponent,
           ),
       },
     ],
-  },
-  {
-    path: 'login',
-    loadComponent: () =>
-      import('./pages/login/login.component').then((m) => m.LoginComponent),
-  },
-  {
-    path: 'register',
-    loadComponent: () =>
-      import('./pages/register/register.component').then(
-        (m) => m.RegisterComponent,
-      ),
   },
 ];
