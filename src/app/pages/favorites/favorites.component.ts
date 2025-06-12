@@ -7,6 +7,9 @@ interface FavoriteItem {
   description: string;
   price: number;
   imageUrl: string;
+  rating?: number;
+  reviews?: number;
+  bonusPercent?: number;
 }
 
 @Component({
@@ -19,24 +22,53 @@ export class FavoritesComponent {
   favorites: FavoriteItem[] = [
     {
       id: 1,
-      name: 'Premium Watch',
-      description: 'Luxury timepiece with leather strap',
-      price: 299.99,
-      imageUrl: 'https://images.unsplash.com/photo-1524805444758-089113d48a6d?w=500&auto=format'
+      name: 'Художественный маркер 11219011_377029 80 шт',
+      description: 'Профессиональные маркеры для рисования',
+      price: 2799,
+      imageUrl: 'assets/маркеры.jpeg',
+      rating: 0,
+      reviews: 0,
+      bonusPercent: 5
     },
     {
       id: 2,
-      name: 'Designer Bag',
-      description: 'Handcrafted leather bag',
-      price: 199.99,
-      imageUrl: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=500&auto=format'
+      name: 'Скетчбук Van Gogh 20k-04, B5, 80 л, синий',
+      description: 'Скетчбук для рисования и скетчинга',
+      price: 3179,
+      imageUrl: 'assets/скетчбук.jpg',
+      rating: 0,
+      reviews: 0,
+      bonusPercent: 5
     },
     {
       id: 3,
-      name: 'Smart Speaker',
-      description: 'Voice-controlled smart speaker',
-      price: 149.99,
-      imageUrl: 'https://images.unsplash.com/photo-1543512214-318c7553f230?w=500&auto=format'
+      name: 'Маркер Guangna Акриловый GN.8101-12, 12 шт, 1 мм, разноцветный',
+      description: 'Яркие акриловые маркеры для творчества',
+      price: 2309,
+      imageUrl: 'assets/акриловые маркеры.jpeg',
+      rating: 0,
+      reviews: 0,
+      bonusPercent: 5
+    },
+    {
+      id: 4,
+      name: 'Ручка линер SAKURA Pigma Micron POXSDK4C 3 шт, цвет чернил серый',
+      description: 'Тонкие линеры для точной работы',
+      price: 1890,
+      imageUrl: 'assets/микрон.jpg',
+      rating: 0,
+      reviews: 0,
+      bonusPercent: 5
+    },
+    {
+      id: 5,
+      name: 'Краски Гуашевые Сонет ЗХК 3641064 мультиколор 12 шт 40 мл',
+      description: 'Гуашь для художественных работ',
+      price: 1590,
+      imageUrl: 'assets/гуашь.jpg',
+      rating: 0,
+      reviews: 0,
+      bonusPercent: 5
     }
   ];
 
