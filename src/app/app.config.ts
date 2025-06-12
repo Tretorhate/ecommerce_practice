@@ -5,11 +5,8 @@ import {
 } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideAnimations } from '@angular/platform-browser/animations';
-import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
-
 import { routes } from './app.routes';
 import { baseUrlInterceptor } from './core/interceptors/base-url';
-import { provideAnimations } from '@angular/platform-browser/animations';
 import { providePrimeNG } from 'primeng/config';
 import Material from '@primeng/themes/material';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
@@ -35,7 +32,5 @@ export const appConfig: ApplicationConfig = {
         },
       },
     }),
-    provideAnimations(),
-    provideAnimationsAsync(),
   ],
 };
