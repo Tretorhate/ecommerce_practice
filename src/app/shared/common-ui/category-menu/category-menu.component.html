@@ -1,0 +1,29 @@
+<section class="flex justify-center relative" (mouseleave)="onCategoryLeave()">
+  <div class="w-full max-w-[960px] mx-auto">
+    <ul
+      class="flex justify-center text-[#0089D0] font-semibold border-r border-[#0089D0]"
+    >
+      @for (category of categories; track category.id) {
+      <li (mouseenter)="onCategoryHover(category.id)" class="relative">
+        <a
+          href="#"
+          class="hover:underline border-l border-[#0089D0] w-[106px] h-14 flex items-center justify-center text-center whitespace-normal text-sm"
+        >
+          {{ category.name }}
+        </a>
+      </li>
+      }
+    </ul>
+  </div>
+
+  @if (isMenuOpen) {
+  <div
+    class="absolute top-full left-0 w-full bg-white shadow-lg z-50 transition-all duration-300 ease-in-out transform"
+    (mouseleave)="onCategoryLeave()"
+  >
+    <app-category-modal
+      [initialCategory]="activeCategoryId"
+    ></app-category-modal>
+  </div>
+  }
+</section>

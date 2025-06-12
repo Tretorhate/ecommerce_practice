@@ -1,15 +1,13 @@
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { CartSidebarComponent } from '../cart-sidebar/cart-sidebar.component';
 
 @Component({
   selector: 'app-home',
-  standalone: true,
-  imports: [ CommonModule, CartSidebarComponent],
+  imports: [CategoryCarouselComponent, CartSidebarComponent],
   templateUrl: './home.component.html',
 })
 export class HomeComponent {
-  products = [
+ products = [
     {
       name: 'Apple 18W USB-C Power Adapter USB Type-C белый',
       price: 6900,
@@ -53,4 +51,5 @@ export class HomeComponent {
       quantity: 1 
     }
   ];
-}
+}}
+
