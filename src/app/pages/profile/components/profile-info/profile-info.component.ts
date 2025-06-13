@@ -40,7 +40,7 @@ saveName() {
   this.isNameLoading.set(true)
   const name = this.profileForm.get('name')?.value!;
 
-  this.profileService.updateName(name).subscribe({
+  this.profileService.updateField("name",name).subscribe({
     next:(res) =>{
       this.isNameLoading.set(false)
    
@@ -57,7 +57,7 @@ saveEmail(){
   if(this.profileForm.get('email')?. invalid) return;
   const email :string = this.profileForm.get('email')?.value!;
   this.isEmailLoading.set(true);
-  this.profileService.updateEmail(email).subscribe({
+  this.profileService.updateField("email",email).subscribe({
     next:(res) =>{
       this.isEmailLoading.set(false)
 

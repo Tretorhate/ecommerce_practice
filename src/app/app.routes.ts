@@ -53,6 +53,10 @@ export const routes: Routes = [
                 (m) => m.ProfileComponent
               )
           },
+          {
+            path:'product',
+            loadComponent: () => import('./pages/product-page/product-page.component').then((m) => m.ProductPageComponent)
+          },
       {
         path: '**',
         title: 'Not found',
