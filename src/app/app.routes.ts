@@ -46,6 +46,13 @@ export const routes: Routes = [
             (m) => m.FavoritesComponent
           ),
       },
+        {
+            path:'profile',
+            loadComponent: () =>
+              import('./pages/profile/profile.component').then(
+                (m) => m.ProfileComponent
+              )
+          },
       {
         path: '**',
         title: 'Not found',

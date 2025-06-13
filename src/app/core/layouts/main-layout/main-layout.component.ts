@@ -3,15 +3,18 @@ import { RouterOutlet } from '@angular/router';
 import { HeaderComponent } from '../../../pages/header/header.component';
 import { FooterComponent } from './../../../pages/footer/footer.component';
 
+
 @Component({
   selector: 'app-main-layout',
   imports: [RouterOutlet, FooterComponent, HeaderComponent],
   template: `
-    <app-header />
-    <main>
-      <router-outlet></router-outlet>
-    </main>
-    <app-footer />
+    <app-header/>
+    <main class="flex justify-center items-center min-h-[95svh] mt-5 bg-[#EEEEEE]">
+  <div class="w-full max-w-[1440px] px-4 sm:px-6 lg:px-6 xl:px-[225px]">
+    <router-outlet></router-outlet>
+  </div>
+</main>
+    <app-footer/>
   `,
 })
 export class MainLayout {}

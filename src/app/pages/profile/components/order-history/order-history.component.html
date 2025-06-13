@@ -1,0 +1,38 @@
+<div class="bg-white rounded-xl shadow p-6 flex flex-col h-[500px] relative">
+  <h2 class="text-lg font-bold text-gray-800 mb-4">История заказов</h2>
+  @if (isOrdersLoading()) {
+    <span class="loader absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" style="--loader-color: rgb(159, 159, 159); --loader-size: 64px"></span>
+  }
+  @else {
+  <div class="overflow-y-auto space-y-4 pr-2 mb-4 flex justify-center items-center">
+    <!-- Один заказ -->
+ 
+   @if (!orders().length) {
+    <h2>У вас нет заказов</h2>
+   }
+   @else {
+     @for (order of orders(); track order.id) {
+    <div class="rounded-lg p-4 border border-gray-300">
+    <div class="flex justify-between items-center mb-3">
+      <span class="font-semibold text-blue-600">{{order.status}}</span>
+      <span class="text-gray-700 text-sm">{{ order.createdAt | date: 'dd.MM.yyyy' }}</span>
+    </div>
+
+    <!-- Список OrderItems -->
+   @for (item of order.items; track item.id) {
+     <ul class="space-y-2 mb-3 overflow-y-auto">
+      <li>
+        <div class="font-semibold text-gray-900">{{item.product.title}}</div>
+        <div class="text-gray-500 text-sm">{{ item.price }} x {{ item.quantity }} = {{ item.total }}</div>
+      </li>
+    </ul>
+   }
+
+    <!-- Итог заказа -->
+    <div class="text-lg font-bold text-yellow-500 text-right">Итого: {{order.total}}</div>
+  </div>
+  }
+   }
+  </div>
+}
+</div>
