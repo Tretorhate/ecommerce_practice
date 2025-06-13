@@ -1,0 +1,85 @@
+<div class="max-w-[960px] mx-auto my-6 py-12">
+  <div class="flex gap-6">
+    <!-- Left column: Filters -->
+    <aside class="w-1/4 space-y-6">
+      <!-- Category filter -->
+      <app-category-filter
+        [activeCategoryId]="selectedCategory"
+        (categorySelected)="onCategorySelected($event)"
+      ></app-category-filter>
+
+      <!-- Price filter -->
+      <div>
+        <h2 class="font-semibold mb-2">Цена</h2>
+        <div class="flex items-center gap-2">
+          <input
+            type="number"
+            [(ngModel)]="minPrice"
+            placeholder="От"
+            class="w-20 p-1 border rounded text-xs"
+          />
+          <span>-</span>
+          <input
+            type="number"
+            [(ngModel)]="maxPrice"
+            placeholder="До"
+            class="w-20 p-1 border rounded text-xs"
+          />
+        </div>
+      </div>
+
+      <!-- Brand filter -->
+      <div>
+        <h2 class="font-semibold mb-2">Бренд</h2>
+        <ul class="space-y-1 text-sm">
+          @for (brand of brandOptions; track brand) {
+          <li class="flex items-center gap-2">
+            <input
+              type="checkbox"
+              [checked]="selectedBrands.has(brand)"
+              (change)="toggleBrand(brand, $any($event.target).checked)"
+              class="accent-blue-600"
+            />
+            <span>{{ brand }}</span>
+          </li>
+          }
+        </ul>
+      </div>
+
+      <!-- Seller filter -->
+      <div>
+        <h2 class="font-semibold mb-2">Продавец</h2>
+        <ul class="space-y-1 text-sm">
+          @for (seller of sellerOptions; track seller) {
+          <li class="flex items-center gap-2">
+            <input
+              type="checkbox"
+              [checked]="selectedSellers.has(seller)"
+              (change)="toggleSeller(seller, $any($event.target).checked)"
+              class="accent-blue-600"
+            />
+            <span>{{ seller }}</span>
+          </li>
+          }
+        </ul>
+      </div>
+    </aside>
+
+    <!-- Right column: Products -->
+    <section class="flex-1">
+      <div
+        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-0 auto-rows-fr"
+      >
+        @for (product of filteredProducts; track product.id) {
+        <app-product-card [product]="product"></app-product-card>
+        }
+      </div>
+
+      @if (filteredProducts.length === 0) {
+      <div class="text-center py-10 text-gray-500">
+        Нет товаров для отображения
+      </div>
+      }
+    </section>
+  </div>
+</div>

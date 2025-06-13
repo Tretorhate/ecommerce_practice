@@ -15,15 +15,14 @@ export const routes: Routes = [
     canActivate: [authLoginGuard],
     loadComponent: () =>
       import('./pages/register/register.component').then(
-        (m) => m.RegisterComponent,
+        (m) => m.RegisterComponent
       ),
   },
   {
     path: '',
-
     loadComponent: () =>
       import('./core/layouts/main-layout/main-layout.component').then(
-        (m) => m.MainLayout,
+        (m) => m.MainLayout
       ),
     children: [
       {
@@ -32,11 +31,19 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./pages/home/home.component').then((m) => m.HomeComponent),
       },
-      { //for my favorites page, but it should be somewhere in the profile like in wb
+      {
+        path: 'category',
+        title: 'Categories',
+        loadComponent: () =>
+          import('./pages/products/products.component').then(
+            (m) => m.ProductsComponent
+          ),
+      },
+      {
         path: 'favorites',
         loadComponent: () =>
           import('./pages/favorites/favorites.component').then(
-            (m) => m.FavoritesComponent,
+            (m) => m.FavoritesComponent
           ),
       },
       {
@@ -44,10 +51,9 @@ export const routes: Routes = [
         title: 'Not found',
         loadComponent: () =>
           import('./pages/notfound/notfound.component').then(
-            (m) => m.NotfoundComponent,
+            (m) => m.NotfoundComponent
           ),
       },
     ],
   },
-
 ];

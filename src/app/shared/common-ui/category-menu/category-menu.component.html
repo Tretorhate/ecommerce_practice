@@ -1,4 +1,7 @@
-<section class="flex justify-center relative" (mouseleave)="onCategoryLeave()">
+<section
+  class="flex justify-center relative border-t border-b border-gray-200"
+  (mouseleave)="onCategoryLeave()"
+>
   <div class="w-full max-w-[960px] mx-auto">
     <ul
       class="flex justify-center text-[#0089D0] font-semibold border-r border-[#0089D0]"
@@ -6,7 +9,8 @@
       @for (category of categories; track category.id) {
       <li (mouseenter)="onCategoryHover(category.id)" class="relative">
         <a
-          href="#"
+          [routerLink]="['/category']"
+          [queryParams]="category.id === 'all' ? null : { cat: category.id }"
           class="hover:underline border-l border-[#0089D0] w-[106px] h-14 flex items-center justify-center text-center whitespace-normal text-sm"
         >
           {{ category.name }}
