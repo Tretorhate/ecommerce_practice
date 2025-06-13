@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CartCardComponent } from '../../shared/common-ui/cart-card/cart-card.component';
 import { CommonModule } from '@angular/common';
 
@@ -9,6 +9,7 @@ import { CommonModule } from '@angular/common';
 })
 export class CartSidebarComponent {
   @Input() products: any[] = [];
+  @Output() cartUpdated = new EventEmitter<void>(); 
   isOpen = false;
 
   openSidebar() {
@@ -19,7 +20,6 @@ export class CartSidebarComponent {
     this.isOpen = false;
   }
 
-  // Подсчет общего количества товаров
   getTotalQuantity(): number {
     return this.products.reduce(
       (total, product) => total + (product.quantity || 1),
@@ -27,7 +27,6 @@ export class CartSidebarComponent {
     );
   }
 
-  // Подсчет итоговой суммы
   getTotalPrice(): number {
     return this.products.reduce(
       (total, product) => total + product.price * (product.quantity || 1),
@@ -35,16 +34,17 @@ export class CartSidebarComponent {
     );
   }
 
-  // Удаление продукта из корзины
-  removeProduct(index: number) {
-    this.products.splice(index, 1); // Удаляем продукт из массива
-    this.updateTotal(); // Обновляем итоговую сумму
+  removeProduct(productId: string) {
+    this.products = this.products.filter((product) => product.id !== productId);
+
+    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+    const updatedCart = cart.filter((id: string) => id !== productId);
+    localStorage.setItem('cart', JSON.stringify(updatedCart));
+
+    this.cartUpdated.emit();
   }
 
-  // Обновление итоговой суммы
-  updateTotal() {
-    // Этот метод вызывается при изменении количества товара
-  }
+  updateTotal() {}
 
   // Обработчик для кнопки "Заказать"
   order() {

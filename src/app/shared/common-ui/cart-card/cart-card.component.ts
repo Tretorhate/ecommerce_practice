@@ -3,14 +3,13 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 
 @Component({
   selector: 'app-cart-card',
-  standalone: true,
   imports: [CommonModule],
   templateUrl: './cart-card.component.html'
 })
 export class CartCardComponent {
-  @Input() product!: { name: string; price: number; image: string; quantity: number };
+  @Input() product!: { id: string; title: string; price: number; image: string; quantity: 1 };
   @Output() quantityChange = new EventEmitter<number>();
-  @Output() removeProduct = new EventEmitter<void>();
+  @Output() removeProduct = new EventEmitter<string>();
 
   get totalPrice(): number {
     return this.product.price * this.product.quantity;
@@ -26,7 +25,7 @@ export class CartCardComponent {
       this.product.quantity--;
       this.quantityChange.emit(this.product.quantity);
     } else {
-      this.removeProduct.emit(); // Уведомляем родителя о необходимости удаления продукта
+      this.removeProduct.emit(this.product.id);
     }
   }
 }
