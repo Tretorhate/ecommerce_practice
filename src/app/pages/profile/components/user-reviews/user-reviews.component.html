@@ -1,17 +1,29 @@
- <div class="bg-white rounded-xl shadow p-6 flex flex-col h-[500px]">
+ <div class="bg-white rounded-xl shadow p-6 flex flex-col h-[500px] relative">
         <h2 class="text-lg font-bold text-gray-800 mb-4">Мои отзывы</h2>
-        <div class="overflow-y-auto space-y-4 pr-2">
-          <div class="border-l-4 border-blue-500 bg-blue-50 p-4 rounded">
-            <div class="flex justify-between items-center mb-2">
-              <div class="flex text-yellow-400 text-sm">
-                ★★★★☆
+       @if (isReviewsLoading()) {
+        <span class="loader absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" style="--loader-color: rgb(159, 159, 159); --loader-size: 64px"></span>
+  }
+       @else {
+         <div class="overflow-y-auto space-y-4 pr-2 mb-4 flex justify-center items-center">
+          @if (!reviews().length) {
+            <h2>У вас нет отзывов</h2>
+          }
+          @else {
+
+            @for (review of reviews(); track review.id) {
+              <div class="border-l-4 border-blue-500 bg-blue-50 p-4 rounded">
+              <div class="flex justify-between items-center mb-2">
+                <p>{{review.rating}}/5</p>
+                <span class="text-gray-500 text-xs">{{review.createdAt | date: 'dd.MM.yyyy'}}</span>
               </div>
-              <span class="text-gray-500 text-xs">12.06.2025</span>
+              <div class="font-semibold text-gray-900 mb-1">{{review.product.title}}</div>
+              <div class="text-gray-700 text-sm leading-snug">
+               {{review.text}}
+              </div>
             </div>
-            <div class="font-semibold text-gray-900 mb-1">Название товара</div>
-            <div class="text-gray-700 text-sm leading-snug">
-              Текст отзыва о товаре. Здесь будет размещен комментарий пользователя о качестве товара и услуги.
-            </div>
-          </div>
+            }
+          }
         </div>
+       }
+        
       </div>

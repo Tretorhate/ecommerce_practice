@@ -1,18 +1,18 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-
+import { Profile } from '../../models/profile.model';
 @Injectable({
   providedIn: 'root'
 })
 export class ProfileService {
 
- private apiUrl = '/profile'; 
+ private apiUrl = '/users/profile'; 
 
   constructor(private http: HttpClient) {}
   
-    getProfile(): Observable<{name: string, email:string, profilePic: string}> {
-    return this.http.get<{name: string, email:string, profilePic: string}>(this.apiUrl);
+    getProfile(): Observable<Profile> {
+    return this.http.get<Profile>(this.apiUrl);
   }
 
   updateName(name: string): Observable<any> {

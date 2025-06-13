@@ -1,14 +1,14 @@
-<div class="bg-white rounded-xl shadow p-6 mb-8">
+<div class="bg-white rounded-xl shadow p-6 mb-8 flex justify-center items-center">
   @if (isProfileInfoLoading()) {
-    <span class="loader w-6 h-6"></span>
+    <span class="loader w-6 h-6 " ></span>
   }
   @else {
     <div class="flex flex-col items-center text-center space-y-4">
-    <div class="w-32 h-32 relative">
+    <div class="w-32 h-32 relative rounded-full overflow-hidden">
       <img
-        [src]="profileInfo().profilePic"
+        [src]="profileInfo().picture || 'svg/MESSI.jpg'"
         alt="Аватар"
-        class="h-full object-cover border-4 rounded-3xl"
+        class="w-full h-full object-cover rounded-full"
       />
     </div>
 
@@ -26,7 +26,7 @@
             [disabled]="isNameLoading()"
           >
             @if (isNameLoading()) {
-              <span class="loader w-5 h-5"></span>
+              <span class="loader "  style="--loader-color: blue; --loader-size: 12px" > </span>
             }
             @else {
               <img src="svg/edit.svg" alt="Изменить" class="w-5 h-5" />
@@ -54,10 +54,10 @@
             [disabled]="isEmailLoading()"
           >
               @if (isEmailLoading()) {
-              <span class="loader w-5 h-5"></span>
+              <span class="loader "  style="--loader-color: blue; --loader-size: 12px"></span>
             }
             @else {
-              <img src="svg/edit.svg" alt="Изменить" class="w-5 h-5" />
+              <img src="svg/save.svg" alt="Изменить" class="w-5 h-5" />
             }
           </button>
          </div>

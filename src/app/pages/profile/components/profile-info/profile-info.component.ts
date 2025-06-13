@@ -1,7 +1,8 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ProfileService } from '../../../../shared/services/profile/profile.service';
-import { profile } from 'console';
+import { Profile } from '../../../../shared/models/profile.model';
+
 
 
 
@@ -18,7 +19,7 @@ export class ProfileInfoComponent implements OnInit {
   isProfileInfoLoading = signal(false);
   isEmailLoading =signal(false);
   isNameLoading = signal(false);
-profileInfo = signal({ profilePic: '', name: '', email: '' });
+profileInfo = signal<Pick<Profile, 'picture' | 'name' | 'email'>>({ picture: '', name: '', email: '' });
 isEditingName = signal(false);
 isEditingEmail= signal(false);
 toggleEditName(){
@@ -42,7 +43,7 @@ saveName() {
   this.profileService.updateName(name).subscribe({
     next:(res) =>{
       this.isNameLoading.set(false)
-      alert("Имя обновлено!")
+   
       this.profileInfo.update(profile =>({...profile, name}))
     },
     error:(err) =>{
@@ -59,7 +60,7 @@ saveEmail(){
   this.profileService.updateEmail(email).subscribe({
     next:(res) =>{
       this.isEmailLoading.set(false)
-      alert('Почта обновлена!')
+
        this.profileInfo.update(profile =>({...profile, email}))
       this.isEditingEmail.set(false)
     },

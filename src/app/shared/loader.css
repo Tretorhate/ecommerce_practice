@@ -1,7 +1,7 @@
 .loader {
   --loader-size: 48px;
   --loader-border: 5px;
-  --loader-color: #FFF;
+  --loader-color: black;
 
   width: var(--loader-size);
   height: var(--loader-size);
