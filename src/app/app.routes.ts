@@ -17,20 +17,29 @@ export const routes: Routes = [
       import('./pages/register/register.component').then(
         (m) => m.RegisterComponent,
       ),
-    },
-    {
-      path: '',
-      loadComponent: () =>
-        import('./core/layouts/main-layout/main-layout.component').then(
-          (m) => m.MainLayout,
-        ),
-        children: [
-          {
-            path: '',
-            loadComponent: () =>
-              import('./pages/home/home.component').then((m) => m.HomeComponent),
-          },
-          {
+  },
+  {
+    path: '',
+
+    loadComponent: () =>
+      import('./core/layouts/main-layout/main-layout.component').then(
+        (m) => m.MainLayout,
+      ),
+    children: [
+      {
+        path: '',
+        title: 'Home page',
+        loadComponent: () =>
+          import('./pages/home/home.component').then((m) => m.HomeComponent),
+      },
+      { //for my favorites page, but it should be somewhere in the profile like in wb
+        path: 'favorites',
+        loadComponent: () =>
+          import('./pages/favorites/favorites.component').then(
+            (m) => m.FavoritesComponent,
+          ),
+      },
+        {
             path:'profile',
             loadComponent: () =>
               import('./pages/profile/profile.component').then(
@@ -47,4 +56,5 @@ export const routes: Routes = [
       },
     ],
   },
+
 ];
