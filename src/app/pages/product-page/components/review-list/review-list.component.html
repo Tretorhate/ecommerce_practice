@@ -1,5 +1,5 @@
 <div
-  class="bg-gray-50 rounded-xl shadow p-6 w-full max-w-3xl mx-auto space-y-6 relative"
+  class="bg-gray-50 rounded-xl shadow p-6 min-h-52 w-full max-w-3xl mx-auto space-y-6 relative"
 >
   <h3 class="text-xl font-semibold text-gray-800">Отзывы</h3>
 
@@ -27,6 +27,7 @@
           <div class="flex justify-between items-start mb-2">
             <div>
               <p class="text-gray-900 font-medium">{{ productReview.user.name }}</p>
+
               <span class="text-yellow-500 font-bold">⭐ {{ productReview.rating }}</span>
             </div>
             <p class="text-sm text-gray-400">

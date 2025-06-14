@@ -3,8 +3,10 @@ export interface OrderItem {
   quantity: number;
   price: number;
   total: number;
-  product: {
+  product?: {
+    id: string,
     title: string;
     category?: string;
   };
+  storeId:string
 }

@@ -54,7 +54,7 @@ export const routes: Routes = [
               )
           },
           {
-            path:'product',
+            path:'product/:id',
             loadComponent: () => import('./pages/product-page/product-page.component').then((m) => m.ProductPageComponent)
           },
       {

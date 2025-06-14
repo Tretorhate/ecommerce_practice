@@ -8,5 +8,8 @@ export interface Review{
     },
     user:{
         name: string
+    },
+    store:{
+        title: string
     }
 }
