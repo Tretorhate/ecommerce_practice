@@ -2,10 +2,11 @@ import { Component } from '@angular/core';
 import { ReviewFormComponent } from '../profile/components/review-form/review-form.component';
 import { ReviewListComponent } from './components/review-list/review-list.component';
 import { ActivatedRoute } from '@angular/router';
+import { ProductInfoComponent } from './components/product-info/product-info.component';
 
 @Component({
   selector: 'product-page',
-  imports: [ReviewListComponent,],
+  imports: [ReviewListComponent, ProductInfoComponent],
   templateUrl: './product-page.component.html',
 
 })
