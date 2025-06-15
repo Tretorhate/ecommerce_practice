@@ -7,8 +7,9 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { ProductInfoService } from '../../../../shared/services/product-info/product-info.service';
+import { ProductReviewService } from '../../../../shared/services/product-review/product-review.service';
 import { output } from '@angular/core';
+import { Error } from '../../../../shared/models/error.model';
 
 @Component({
   selector: 'review-form',
@@ -17,10 +18,11 @@ import { output } from '@angular/core';
   templateUrl: './review-form.component.html',
 })
 export class ReviewFormComponent {
-  constructor(private productInfoService: ProductInfoService) {}
+  constructor(private productReviewService: ProductReviewService) {}
 
+  formError = signal<Error>({ status: '', statusText: '' });
   isFormLoading = signal(false);
-  productId = input<string>(); 
+  productId = input<string>();
   storeId = input<string>();
   productTitle = input<string>();
 
@@ -28,9 +30,9 @@ export class ReviewFormComponent {
     rating: new FormControl('', [Validators.required]),
     text: new FormControl(''),
   });
-close = output<void>()
+  close = output<void>();
   sendReview() {
-    const productId = this.productId(); 
+    const productId = this.productId();
     const storeId = this.storeId();
     if (!productId || !storeId) return;
 
@@ -38,18 +40,20 @@ close = output<void>()
 
     const rating = Number(this.reviewForm.get('rating')?.value);
     const text = this.reviewForm.get('text')?.value ?? '';
-    
 
-    this.productInfoService
-      .postReview(productId,storeId, { text, rating })
+    this.productReviewService
+      .postReview(productId, storeId, { text, rating })
       .subscribe({
         next: () => {
-          console.log("form works")
           this.isFormLoading.set(false);
           this.reviewForm.reset();
         },
         error: (err) => {
-          console.error(err);
+      
+          this.formError.set({
+            status: err.status,
+            statusText: err.statusText,
+          });
           this.isFormLoading.set(false);
         },
       });

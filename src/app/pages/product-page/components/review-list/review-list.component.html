@@ -26,7 +26,8 @@
         <li class="bg-white p-4 rounded-lg shadow border border-gray-200">
           <div class="flex justify-between items-start mb-2">
             <div>
-              <p class="text-gray-900 font-medium">{{ productReview.user.name }}</p>
+              <p class="text-gray-900 text-lg font-medium"> 👤{{ productReview.user.name }}</p>
+               <p class="text-gray-900 font-semibold">Приобретено в:{{ productReview.store.title }}</p>
 
               <span class="text-yellow-500 font-bold">⭐ {{ productReview.rating }}</span>
             </div>

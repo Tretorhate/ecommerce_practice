@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, input, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { ProductInfoService } from '../../../../shared/services/product-info/product-info.service';
+import { ProductReviewService } from '../../../../shared/services/product-review/product-review.service';
 import { Review } from '../../../../shared/models/review.model';
 
 @Component({
@@ -11,20 +11,16 @@ import { Review } from '../../../../shared/models/review.model';
   templateUrl: './review-list.component.html',
 })
 export class ReviewListComponent {
-  constructor(
-    private productInfoService: ProductInfoService,
-    
-  ) {}
+  constructor(private productReviewService: ProductReviewService) {}
 
   isReviewsLoading = signal(false);
   productReviews = signal<Review[]>([]);
-   productId = input("");
+  productId = input('');
 
-  getProductReviews(productId:string) {
+  getProductReviews(productId: string) {
     this.isReviewsLoading.set(true);
-    
-    
-    this.productInfoService.fetchReviews(productId).subscribe({
+
+    this.productReviewService.fetchReviews(productId).subscribe({
       next: (res) => {
         this.productReviews.set(res);
         this.isReviewsLoading.set(false);
@@ -37,8 +33,8 @@ export class ReviewListComponent {
   }
 
   ngOnInit() {
-     if (this.productId) {
-    this.getProductReviews(this.productId());
-  }
+    if (this.productId) {
+      this.getProductReviews(this.productId());
+    }
   }
 }

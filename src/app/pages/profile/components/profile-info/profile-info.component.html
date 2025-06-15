@@ -114,6 +114,12 @@
         </form>
         }
       </div>
+      @if (profileChangeError().status || profileChangeError().statusText) {
+        <p class="text-red-400">
+        Ошибка при изменении данных: <br />
+        {{ profileChangeError().statusText }} {{ profileChangeError().status }}
+      </p>
+      }
     </div>
   </div>
   }

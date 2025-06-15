@@ -7,7 +7,7 @@ import { Review } from '../../models/review.model';
 @Injectable({
   providedIn: 'root'
 })
-export class ProductInfoService {
+export class ProductReviewService {
   private readonly http = inject(HttpClient);
   private readonly route = inject(ActivatedRoute);
 
