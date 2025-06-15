@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ProductInfoService } from '../../../../shared/services/product-info/product-info.service';
+import { ProductReviewService } from '../../../../shared/services/product-review/product-review.service';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { CartService } from '../../../../shared/services/cart.service';
@@ -28,7 +28,7 @@ export class ProductInfoComponent implements OnInit {
   };
 
   constructor(
-    private productInfoService: ProductInfoService,
+    private productReviewService: ProductReviewService,
     private route: ActivatedRoute,
     private cartService: CartService
   ) {}
@@ -36,7 +36,7 @@ export class ProductInfoComponent implements OnInit {
   ngOnInit() {
     const productId = this.route.snapshot.paramMap.get('id') || ''; 
     if (productId) {
-      this.productInfoService.fetchProductById(productId).subscribe((data) => {
+      this.productReviewService.fetchProductById(productId).subscribe((data) => {
         this.product.id = data.id;
         this.product.title = data.title;
         this.product.price = data.price;
