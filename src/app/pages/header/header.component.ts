@@ -15,8 +15,10 @@ export class HeaderComponent implements OnInit {
   constructor(private cartService: CartService) {}
 
   ngOnInit() {
-    this.loadCart();
-    this.loadProducts();
+    this.cartService.cart$.subscribe((cart) => {
+      this.cart = cart; 
+      this.loadProducts(); 
+    });
   }
 
   // Load cart from localStorage
@@ -25,19 +27,16 @@ export class HeaderComponent implements OnInit {
     this.cart = cart ? JSON.parse(cart) : [];
   }
 
-  // Fetch product details from the server
   loadProducts() {
     if (this.cart.length > 0) {
       this.cartService.getProductsByIds(this.cart).subscribe(
-        (product) => {
-          // Transform server response into the required format
-          this.products = [{
+        (products) => {this.products = products.map((product) => ({
             id: product.id,
             title: product.title,
             price: product.price,
-            image: product.images[0], // Use the first image
-            quantity: 1, // Default quantity
-          }];
+            image: product.images[0],
+            quantity: 1, 
+          }));
         },
         (error) => {
           console.error('Error loading products:', error);
@@ -46,12 +45,4 @@ export class HeaderComponent implements OnInit {
     }
   }
 
-  // Add product to cart and update localStorage
-  addToCart(productId: string) {
-    if (!this.cart.includes(productId)) {
-      this.cart.push(productId);
-      localStorage.setItem('cart', JSON.stringify(this.cart));
-      this.loadProducts(); // Refresh product list
-    }
-  }
 }

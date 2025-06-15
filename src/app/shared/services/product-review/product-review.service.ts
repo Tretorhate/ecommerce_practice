@@ -19,6 +19,9 @@ export class ProductReviewService {
     return this.reviewSubmitted$.asObservable();
   }
 
+  fetchProductById(productId: string): Observable<{ id: string; title: string; price: number; images: string[] }> {
+    return this.http.get<{ id: string; title: string; price: number; images: string[] }>(`/products/by-id/${productId}`);
+  }
 
 postReview(productId: string,storeId:string, data: { text: string; rating: number }): Observable<any> {
   
