@@ -9,10 +9,11 @@ import {
 import { ProfileService } from '../../../../shared/services/profile/profile.service';
 import { Profile } from '../../../../shared/models/profile.model';
 import { Error } from '../../../../shared/models/error.model';
+import { ProfilePictureComponent } from '../profile-picture/profile-picture.component';
 
 @Component({
   selector: 'profile-info',
-  imports: [FormsModule, FormsModule, ReactiveFormsModule],
+  imports: [FormsModule, FormsModule, ProfilePictureComponent,ReactiveFormsModule],
   templateUrl: './profile-info.component.html',
 })
 export class ProfileInfoComponent implements OnInit {
@@ -21,7 +22,8 @@ export class ProfileInfoComponent implements OnInit {
   isEmailLoading = signal(false);
   isNameLoading = signal(false);
   profileChangeError = signal<Error>({ status: '', statusText: '' });
-  profileInfo = signal<Pick<Profile, 'picture' | 'name' | 'email'>>({
+  profileInfo = signal<Pick<Profile, 'id' |'picture' | 'name' | 'email'>>({
+    id:'',
     picture: '',
     name: '',
     email: '',
@@ -49,7 +51,7 @@ export class ProfileInfoComponent implements OnInit {
     this.profileService.updateField('name', name).subscribe({
       next: (res) => {
         this.isNameLoading.set(false);
-
+        
         this.profileInfo.update((profile) => ({ ...profile, name }));
       },
       error: (err) => {
@@ -82,6 +84,7 @@ export class ProfileInfoComponent implements OnInit {
       next: (res) => {
         this.isProfileInfoLoading.set(false);
         this.profileInfo.set(res);
+       
         this.profileForm.patchValue({
           name: res.name,
           email: res.email,

@@ -33,6 +33,14 @@ export class ProfileService {
       })
     );
   }
+updatePicture(newPictureUrl: string): Observable<any> {
+    return this.http.patch(`${this.apiUrl}`, { picture: newPictureUrl }).pipe(
+      tap(() => {
+    
+        this.getProfile().subscribe();
+      })
+    );
+  }
 
   getProfileStream(): Observable<Profile | null> {
     return this.profile$.asObservable();

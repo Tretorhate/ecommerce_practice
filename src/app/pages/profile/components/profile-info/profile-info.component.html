@@ -4,14 +4,8 @@
   }
   @else {
     <div class="flex flex-col items-center text-center space-y-4">
-    <div class="w-32 h-32 relative rounded-full overflow-hidden">
-      <img
-        [src]="profileInfo().picture || 'https://practiceapi.mooo.com/uploads/no-user-image.png'"
-        alt="Аватар"
-        class="w-full h-full object-cover rounded-full"
-      />
-    </div>
-
+ 
+      <profile-picture [pictureUrl]="profileInfo().picture" [userId]="profileInfo().id" (pictureChanged)="profileInfo().picture"/>
     <div class="text-center space-y-2">
       <div class="flex items-center justify-center space-x-2 flex-col">
         <div class="flex">
