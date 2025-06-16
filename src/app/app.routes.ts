@@ -47,19 +47,24 @@ export const routes: Routes = [
           ),
       },
       {
-        path: 'profile',
-        loadComponent: () =>
-          import('./pages/profile/profile.component').then(
-            (m) => m.ProfileComponent,
-          ),
-      },
-      {
-        path: '**',
-        title: 'Not found',
-        loadComponent: () =>
-          import('./pages/notfound/notfound.component').then(
-            (m) => m.NotfoundComponent,
-          ),
+         path:'profile',
+         canActivate:[authGuard],
+         loadComponent: () =>
+           import('./pages/profile/profile.component').then(
+             (m) => m.ProfileComponent
+           ),
+       },
+       {
+            path:'product/:id',
+            loadComponent: () => import('./pages/product-page/product-page.component').then((m) => m.ProductPageComponent)
+       },
+       {
+          path: '**',
+          title: 'Not found',
+          loadComponent: () =>
+            import('./pages/notfound/notfound.component').then(
+              (m) => m.NotfoundComponent,
+            ),
       },
     ],
   },

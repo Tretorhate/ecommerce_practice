@@ -1,4 +1,4 @@
 @import "tailwindcss";
 @import "primeicons/primeicons.css";
 @plugin "tailwindcss-primeui";
-@import "../src/app/shared/loader.css";
+@import "../public/assets/loader.css";

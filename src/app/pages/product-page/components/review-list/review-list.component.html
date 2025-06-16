@@ -1,0 +1,45 @@
+<div
+  class="bg-white rounded-xl shadow p-6 min-h-52 w-full max-w-4xl mx-auto space-y-6 relative"
+>
+  <h3 class="text-xl font-semibold text-gray-800">Отзывы к товару</h3>
+
+  @if (isReviewsLoading()) {
+    <div class="absolute inset-0 flex justify-center items-center z-10">
+      <span
+        class="loader"
+        style="--loader-color: rgb(159, 159, 159); --loader-size: 64px"
+      ></span>
+    </div>
+  }
+
+
+  @else if (!productReviews().length) {
+    <div class="text-center text-gray-600 font-medium py-8">
+      У данного товара нет отзывов
+    </div>
+  }
+
+
+  @else {
+    <ul class="space-y-4">
+      @for (productReview of productReviews(); track productReview.id) {
+        <li class="bg-white p-4 rounded-lg shadow border border-gray-200">
+          <div class="flex justify-between items-start mb-2">
+            <div>
+              <p class="text-gray-900 text-lg font-medium"> 👤{{ productReview.user.name }}</p>
+               <p class="text-gray-900 font-semibold">Приобретено в:{{ productReview.store.title }}</p>
+
+              @for (star of [].constructor(productReview.rating); track $index) {
+  <span class="text-yellow-500">⭐</span>
+}
+            </div>
+            <p class="text-sm text-gray-400">
+              {{ productReview.createdAt | date: 'dd.MM.yyyy' }}
+            </p>
+          </div>
+          <p class="text-gray-700">{{ productReview.text }}</p>
+        </li>
+      }
+    </ul>
+  }
+</div>

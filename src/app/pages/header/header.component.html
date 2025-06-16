@@ -12,12 +12,16 @@
       <a href="#">Бизнесу</a>
       <a href="#">Ecommerce Гид</a>
     </nav>
-
+    
     <!-- Right: Cart -->
     <div class="flex items-center gap-1 text-black">
       <span class="text-sm">0</span>
       <span class="text-sm">KZT</span>
       <span class="pi pi-angle-down text-xl cursor-pointer"></span>
+      <a href="/profile">
+      <img src="svg/profile.svg" alt="Профиль" class="w-7 h-7">
+    </a>
+
       <button
         (click)="cartSidebar.openSidebar()"
         class="pi pi-shopping-cart text-xl cursor-pointer pl-4"
@@ -58,56 +62,4 @@
   <app-category-menu></app-category-menu>
 </header>
 
-<header class="bg-white pt-2">
-  <section class="flex px-6 py-4 justify-around items-center">
-    <!-- Left: Logo -->
-    <img src="assets/svgs/Group.svg" alt="Group Icon" class="h-8" />
 
-    <!-- Center: Navigation links -->
-    <nav class="flex gap-8 text-black/40 font-roboto text-base">
-      <a href="#">Клиентам</a>
-      <a href="#">Бизнесу</a>
-      <a href="#">Ecommerce Гид</a>
-    </nav>
-
-    <!-- Right: Cart -->
-    <div class="flex items-center gap-1 text-black">
-      <span class="text-sm">0</span>
-      <span class="text-sm">KZT</span>
-      <span class="pi pi-angle-down text-xl cursor-pointer"></span>
-      <span class="pi pi-shopping-cart text-xl cursor-pointer pl-4"></span>
-    </div>
-  </section>
-
-  <section
-    class="bg-[#EBEBEB] w-full py-2 flex items-center justify-center shadow"
-  >
-    <!-- Left: Search Box -->
-    <div
-      class="flex w-full max-w-2xl border border-gray-300 rounded overflow-hidden"
-    >
-      <button
-        class="px-4 text-[#0089D0] font-medium border-r border-gray-300 bg-[#F5F5F5]"
-      >
-        Магазин
-      </button>
-      <input
-        type="text"
-        placeholder="Поиск товара"
-        class="flex-1 px-4 py-2 focus:outline-none text-sm bg-[#FBFBFB] text-gray-700"
-      />
-      <button
-        class="bg-blue-600 text-white px-4 flex items-center justify-center"
-      >
-        <i class="pi pi-search text-white"></i>
-      </button>
-    </div>
-
-    <!-- Right: City Info -->
-    <div class="ml-4 whitespace-nowrap text-sm">
-      <span class="text-gray-700">Мой город:</span><br />
-      <a href="#" class="text-blue-600 underline">Алматы</a>
-    </div>
-  </section>
-  <app-category-menu></app-category-menu>
-</header>

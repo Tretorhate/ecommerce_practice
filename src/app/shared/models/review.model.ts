@@ -6,4 +6,10 @@ export interface Review{
     product:{
         title: string
     },
+    user:{
+        name: string
+    },
+    store:{
+        title: string
+    }
 }
