@@ -12,7 +12,10 @@ export class AuthService {
   constructor() {}
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
-  private readonly loggedIn$ = new BehaviorSubject<boolean>(false);
+  private readonly loggedIn$ = new BehaviorSubject<boolean>(this.hasValidToken());
+    private hasValidToken(): boolean {
+    const token = localStorage.getItem('accessToken');
+    return !!token; }
 
   login(credentials: { email: string; password: string }): Observable<any> {
     return this.http
@@ -32,6 +35,7 @@ export class AuthService {
 
   logout() {
     localStorage.removeItem('accessToken');
+    this.loggedIn$.next(false);
     this.router.navigate(['/']);
   }
 
