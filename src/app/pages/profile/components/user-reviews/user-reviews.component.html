@@ -18,7 +18,7 @@
           <div class="border-l-4 border-blue-500 bg-blue-50 p-4 rounded w-full">
             <div class="flex justify-between items-center mb-2">
               <p>{{review.rating}}/5 ⭐</p>
-              <span class="text-gray-500 text-xs">{{review.createdAt | date: 'dd.MM.yyyy'}}</span>
+              <span class="text-gray-500 text-md">{{review.createdAt | date: 'dd.MM.yyyy'}}</span>
             </div>
 
             <div class="font-semibold text-gray-900 mb-1">{{review.product.title || 'Без названия'}}</div>

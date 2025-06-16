@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, input, signal } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+
 import { ProductReviewService } from '../../../../shared/services/product-review/product-review.service';
 import { Review } from '../../../../shared/models/review.model';
 
@@ -12,6 +12,7 @@ import { Review } from '../../../../shared/models/review.model';
 })
 export class ReviewListComponent {
   constructor(private productReviewService: ProductReviewService) {}
+  
 
   isReviewsLoading = signal(false);
   productReviews = signal<Review[]>([]);
