@@ -46,7 +46,7 @@
     <div class="flex items-center mb-2">
       <ng-container *ngFor="let _ of stars; let i = index">
         <svg
-          *ngIf="i < product.rating; else emptyStar"
+          *ngIf="i < (product.rating ?? 0); else emptyStar"
           class="w-4 h-4 text-yellow-400 fill-current"
           viewBox="0 0 20 20"
         >

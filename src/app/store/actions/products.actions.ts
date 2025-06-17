@@ -1,5 +1,5 @@
 import { createAction, props } from '@ngrx/store';
-import { Product } from '../../shared/types';
+import { ProductItem } from '../../shared/models/product-item.model';
 import { Error } from '../../shared/models/error.model';
 
 // Load Products
@@ -10,7 +10,7 @@ export const loadProducts = createAction(
 
 export const loadProductsSuccess = createAction(
   '[Products] Load Products Success',
-  props<{ products: Product[] }>()
+  props<{ products: ProductItem[] }>()
 );
 
 export const loadProductsFailure = createAction(
@@ -26,7 +26,7 @@ export const loadProduct = createAction(
 
 export const loadProductSuccess = createAction(
   '[Products] Load Product Success',
-  props<{ product: Product }>()
+  props<{ product: ProductItem }>()
 );
 
 export const loadProductFailure = createAction(

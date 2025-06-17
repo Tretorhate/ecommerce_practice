@@ -1,16 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
-interface Product {
-  id: string;
-  name: string;
-  price: number;
-  rating: number;
-  imageUrl: string;
-  category: string;
-  brand: string;
-  seller: string;
-}
+import { ProductItem } from '../../models/product-item.model';
 
 @Component({
   selector: 'app-product-card',
@@ -19,7 +9,7 @@ interface Product {
   templateUrl: './product-card.component.html',
 })
 export class ProductCardComponent {
-  @Input() product!: Product;
+  @Input() product!: ProductItem;
 
   stars = Array.from({ length: 5 });
 

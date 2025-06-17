@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { catchError, map, mergeMap, tap } from 'rxjs/operators';
 import { of } from 'rxjs';
@@ -8,12 +8,14 @@ import { Router } from '@angular/router';
 
 @Injectable()
 export class ReviewsEffects {
-  // Create review with validation and side effects
+  private actions$ = inject(Actions);
+  private reviewService = inject(ProductReviewService);
+  private router = inject(Router);
+
   createReview$ = createEffect(() =>
     this.actions$.pipe(
       ofType(ReviewsActions.createReview),
       mergeMap(({ review }) => {
-        // Validate review content
         if (!review.text || review.text.length < 10) {
           return of(
             ReviewsActions.createReviewFailure({
@@ -40,20 +42,17 @@ export class ReviewsEffects {
     )
   );
 
-  // Navigate after review creation
   reviewSuccess$ = createEffect(
     () =>
       this.actions$.pipe(
         ofType(ReviewsActions.createReviewSuccess),
         tap(({ review }) => {
-          // Navigate back to product page
           this.router.navigate(['/products', review.product.id]);
         })
       ),
     { dispatch: false }
   );
 
-  // Load reviews with error handling
   loadReviews$ = createEffect(() =>
     this.actions$.pipe(
       ofType(ReviewsActions.loadReviews),
@@ -71,7 +70,6 @@ export class ReviewsEffects {
     )
   );
 
-  // Update review with validation
   updateReview$ = createEffect(() =>
     this.actions$.pipe(
       ofType(ReviewsActions.updateReview),
@@ -102,10 +100,4 @@ export class ReviewsEffects {
       })
     )
   );
-
-  constructor(
-    private actions$: Actions,
-    private reviewService: ProductReviewService,
-    private router: Router
-  ) {}
 }

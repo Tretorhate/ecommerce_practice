@@ -4,17 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { CategoryFilterComponent } from '../../shared/common-ui/category-filter/category-filter.component';
 import { ProductCardComponent } from '../../shared/common-ui/product-card/product-card.component';
 import { ActivatedRoute, Router } from '@angular/router';
-
-interface Product {
-  id: string;
-  name: string;
-  price: number;
-  rating: number;
-  imageUrl: string;
-  category: string;
-  brand: string;
-  seller: string;
-}
+import { ProductItem } from '../../shared/models/product-item.model';
 
 @Component({
   selector: 'app-products',
@@ -71,7 +61,7 @@ export class ProductsComponent implements OnInit {
     tv: ['tv-sets', 'audio'],
   };
 
-  products: Product[] = [
+  products: ProductItem[] = [
     {
       id: 'p1',
       name: 'iPhone 14 Pro 128GB',
@@ -173,7 +163,7 @@ export class ProductsComponent implements OnInit {
     },
   ];
 
-  get filteredProducts(): Product[] {
+  get filteredProducts(): ProductItem[] {
     return this.products.filter((p) => {
       let matchCategory = true;
       if (this.selectedCategory) {
@@ -182,7 +172,7 @@ export class ProductsComponent implements OnInit {
         } else {
           const descendants =
             this.categoryHierarchy[this.selectedCategory] || [];
-          matchCategory = descendants.includes(p.category);
+          matchCategory = descendants.includes(p.category || '');
         }
       }
 
@@ -191,10 +181,10 @@ export class ProductsComponent implements OnInit {
       const matchPriceMax =
         this.maxPrice != null ? p.price <= this.maxPrice : true;
       const matchBrand = this.selectedBrands.size
-        ? this.selectedBrands.has(p.brand)
+        ? this.selectedBrands.has(p.brand || '')
         : true;
       const matchSeller = this.selectedSellers.size
-        ? this.selectedSellers.has(p.seller)
+        ? this.selectedSellers.has(p.seller || '')
         : true;
 
       return (

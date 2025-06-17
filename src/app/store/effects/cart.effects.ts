@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { catchError, map, mergeMap, tap } from 'rxjs/operators';
 import { of } from 'rxjs';
@@ -8,6 +8,10 @@ import { Router } from '@angular/router';
 
 @Injectable()
 export class CartEffects {
+  private actions$ = inject(Actions);
+  private cartService = inject(CartService);
+  private router = inject(Router);
+
   addToCart$ = createEffect(() =>
     this.actions$.pipe(
       ofType(CartActions.addToCart),
@@ -15,7 +19,6 @@ export class CartEffects {
         this.cartService.addItem(item).pipe(
           mergeMap((updatedItem) => [
             CartActions.addToCartSuccess({ item: updatedItem }),
-            // Show notification (you'd need to create these actions)
             // showNotification({ message: 'Item added to cart', type: 'success' })
           ]),
           catchError((error) =>
@@ -107,10 +110,4 @@ export class CartEffects {
       ),
     { dispatch: false }
   );
-
-  constructor(
-    private actions$: Actions,
-    private cartService: CartService,
-    private router: Router
-  ) {}
 }
