@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FavoritesService } from '../../shared/services/favorites service/favorites.service';
+import { FavoritesService } from '../../shared/services/favorites/favorites.service';
 import { baseUrl } from '../../core/interceptors/base-url';
 
 interface FavoriteItemView {

@@ -1,6 +1,6 @@
 import { Component, inject, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FavoritesService } from '../../services/favorites service/favorites.service';
+import { FavoritesService } from '../../services/favorites/favorites.service';
 
 interface Product {
   id: string;

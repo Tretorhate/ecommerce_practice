@@ -3,7 +3,7 @@ import { ProductReviewService } from '../../../../shared/services/product-review
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { CartService } from '../../../../shared/services/cart.service';
-import { FavoritesService } from '../../../../shared/services/favorites service/favorites.service';
+import { FavoritesService } from '../../../../shared/services/favorites/favorites.service';
 @Component({
   selector: 'app-product-info',
   templateUrl: './product-info.component.html',
@@ -64,4 +64,3 @@ export class ProductInfoComponent implements OnInit {
     this.favoriteService.toggleFavorite(this.product.id);
   }
 }
-
