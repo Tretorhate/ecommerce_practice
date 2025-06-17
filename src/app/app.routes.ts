@@ -32,7 +32,7 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./pages/home/home.component').then((m) => m.HomeComponent),
       },
-      { //for my favorites page, but it should be somewhere in the profile like in wb
+      { //for my favorites service page, but it should be somewhere in the profile like in wb
         path: 'favorites',
         loadComponent: () =>
           import('./pages/favorites/favorites.component').then(
