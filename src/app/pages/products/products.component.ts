@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { CategoryFilterComponent } from '../../shared/common-ui/category-filter/category-filter.component';
-import { ProductCardComponent } from '../../shared/common-ui/product-card/product-card.component';
+import { ProductCardComponent } from '../../shared/components/product-card/product-card.component';
 import { ActivatedRoute, Router } from '@angular/router';
+import { CategoryFilterComponent } from '../../shared/components/category-filter/category-filter.component';
 
 interface Product {
   id: string;
@@ -18,7 +18,6 @@ interface Product {
 
 @Component({
   selector: 'app-products',
-  standalone: true,
   imports: [
     CommonModule,
     FormsModule,
@@ -207,7 +206,10 @@ export class ProductsComponent implements OnInit {
     });
   }
 
-  constructor(private route: ActivatedRoute, private router: Router) {}
+  constructor(
+    private route: ActivatedRoute,
+    private router: Router,
+  ) {}
 
   ngOnInit(): void {
     this.route.queryParamMap.subscribe((params) => {

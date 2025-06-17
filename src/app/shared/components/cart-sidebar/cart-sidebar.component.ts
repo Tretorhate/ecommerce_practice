@@ -1,6 +1,6 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { CartCardComponent } from '../../shared/common-ui/cart-card/cart-card.component';
 import { CommonModule } from '@angular/common';
+import { CartCardComponent } from '../cart-card/cart-card.component';
 
 @Component({
   selector: 'app-cart-sidebar',
@@ -9,7 +9,7 @@ import { CommonModule } from '@angular/common';
 })
 export class CartSidebarComponent {
   @Input() products: any[] = [];
-  @Output() cartUpdated = new EventEmitter<void>(); 
+  @Output() cartUpdated = new EventEmitter<void>();
   isOpen = false;
 
   openSidebar() {

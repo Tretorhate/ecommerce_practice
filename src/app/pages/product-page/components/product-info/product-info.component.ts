@@ -1,12 +1,13 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { ProductReviewService } from '../../../../shared/services/product-review/product-review.service';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { CartService } from '../../../../shared/services/cart.service';
+import { FavoritesService } from '../../../../shared/services/favorites service/favorites.service';
 @Component({
   selector: 'app-product-info',
   templateUrl: './product-info.component.html',
-  imports: [CommonModule]
+  imports: [CommonModule],
 })
 export class ProductInfoComponent implements OnInit {
   product: {
@@ -30,20 +31,23 @@ export class ProductInfoComponent implements OnInit {
   constructor(
     private productReviewService: ProductReviewService,
     private route: ActivatedRoute,
-    private cartService: CartService
+    private cartService: CartService,
   ) {}
 
+  private favoriteService = inject(FavoritesService);
   ngOnInit() {
-    const productId = this.route.snapshot.paramMap.get('id') || ''; 
+    const productId = this.route.snapshot.paramMap.get('id') || '';
     if (productId) {
-      this.productReviewService.fetchProductById(productId).subscribe((data) => {
-        this.product.id = data.id;
-        this.product.title = data.title;
-        this.product.price = data.price;
-        this.product.installmentPrice = Math.round(data.price / 3);
-        this.product.image = data.images[0];
-        this.product.thumbnailImages = data.images;
-      });
+      this.productReviewService
+        .fetchProductById(productId)
+        .subscribe((data) => {
+          this.product.id = data.id;
+          this.product.title = data.title;
+          this.product.price = data.price;
+          this.product.installmentPrice = Math.round(data.price / 3);
+          this.product.image = data.images[0];
+          this.product.thumbnailImages = data.images;
+        });
     }
   }
 
@@ -57,6 +61,7 @@ export class ProductInfoComponent implements OnInit {
   isFavorite = false;
 
   toggleFavorite() {
-    this.isFavorite = !this.isFavorite;
+    this.favoriteService.toggleFavorite(this.product.id);
   }
 }
+

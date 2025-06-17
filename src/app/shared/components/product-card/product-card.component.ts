@@ -1,5 +1,6 @@
-import { Component, Input } from '@angular/core';
+import { Component, inject, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FavoritesService } from '../../services/favorites service/favorites.service';
 
 interface Product {
   id: string;
@@ -20,12 +21,13 @@ interface Product {
 })
 export class ProductCardComponent {
   @Input() product!: Product;
+  private favoriteService = inject(FavoritesService);
 
   stars = Array.from({ length: 5 });
 
   isFavorite = false;
 
   toggleFavorite() {
-    this.isFavorite = !this.isFavorite;
+    this.favoriteService.toggleFavorite(this.product.id);
   }
 }

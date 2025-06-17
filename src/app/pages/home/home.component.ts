@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { CategoryCarouselComponent } from '../../shared/common-ui/carousel/category-carousel.component';
+import { CategoryCarouselComponent } from '../../shared/components/carousel/category-carousel.component';
 
 @Component({
   selector: 'app-home',
