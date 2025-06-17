@@ -13,6 +13,12 @@ import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
 import { APP_BASE_HREF } from '@angular/common';
+import { provideStore } from '@ngrx/store';
+import { provideEffects } from '@ngrx/effects';
+import { provideRouterStore, routerReducer } from '@ngrx/router-store';
+// import { provideStoreDevtools } from '@ngrx/store-devtools';
+import { reducers } from './store/reducers';
+import { effects } from './store/effects';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -32,5 +38,9 @@ export const appConfig: ApplicationConfig = {
         },
       },
     }),
+    provideStore(reducers),
+    provideEffects(effects),
+    provideRouterStore(),
+    // provideStoreDevtools({ maxAge: 25, logOnly: false }),
   ],
 };
