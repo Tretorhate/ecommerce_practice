@@ -1,5 +1,5 @@
 <div class="bg-white min-h-screen w-full">
-  <div class="max-w-4xl mx-auto py-4 px-2 sm:px-4 space-y-4">
+  <div class="max-w-4xl mx-auto py-4 px-2 space-y-4">
     <div class="text-2xl font-bold text-gray-900 mb-4">Избранное</div>
 
     <div *ngIf="loading" class="text-gray-500">Загрузка...</div>
@@ -7,44 +7,31 @@
     <div *ngIf="!favorites.length && !loading" class="text-gray-500">Пусто.</div>
 
     <div *ngFor="let item of favorites" class="bg-white rounded-2xl shadow flex overflow-hidden relative">
-      <div class="relative min-w-[110px] max-w-[110px] flex flex-col items-center justify-center">
+      <div class="min-w-[110px] max-w-[110px] flex items-center justify-center">
         <img [src]="item.imageUrl" [alt]="item.title" class="w-[100px] h-[100px] object-cover rounded-xl m-2 border">
-
-        <button (click)="removeFromFavorites(item.id)" class="absolute top-2 right-2 bg-white rounded-full p-1 shadow text-red-500 hover:text-red-600">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5
-                     2 5.42 4.42 3 7.5 3c1.74 0 3.41.81
-                     4.5 2.09C13.09 3.81 14.76 3 16.5 3
-                     19.58 3 22 5.42 22 8.5c0 3.78-3.4
-                     6.86-8.55 11.54L12 21.35z"/>
-          </svg>
+        <button (click)="removeFromFavorites(item.id)"
+                class="absolute top-2 right-2 text-red-500 hover:text-red-600 pr-2">
+          <i class="pi pi-heart-fill text-xl"></i>
         </button>
+
       </div>
 
       <div class="flex-1 flex flex-col justify-between py-2 pr-2">
         <div>
-          <div class="text-sm font-medium text-gray-900 leading-tight line-clamp-2">{{ item.title }}</div>
+          <div class="text-sm font-medium text-gray-900 line-clamp-2 pr-6">{{ item.title }}</div>
 
           <div class="flex items-center space-x-1 mt-1">
             <span *ngIf="item.rating != null; else noRating" class="text-xs text-gray-700 font-semibold">
-              {{ item.rating }}
+              {{ item.rating | number:'1.1-1' }}
             </span>
             <ng-template #noRating><span class="text-xs text-gray-400">-</span></ng-template>
 
-            <span class="flex text-yellow-400">
+            <span class="flex items-center text-yellow-500">
               <ng-container *ngFor="let s of [1,2,3,4,5]; let i = index">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4"
-                     [attr.fill]="item.rating != null && i < item.rating ? 'currentColor' : 'none'"
-                     viewBox="0 0 20 20" stroke="currentColor">
-                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.967a1
-                           1 0 00.95.69h4.178c.969 0 1.371
-                           1.24.588 1.81l-3.385 2.46a1 1 0
-                           00-.364 1.118l1.287 3.966c.3.922-.755
-                           1.688-1.54 1.118l-3.385-2.46a1 1 0
-                           00-1.175 0l-3.385 2.46c-.784.57-1.838-.196-1.54-1.118l1.287-3.966a1
-                           1 0 00-.364-1.118L2.045 9.394c-.783-.57-.38-1.81.588-1.81h4.178a1
-                           1 0 00.95-.69l1.286-3.967z"/>
-                </svg>
+                <i class="pi" [ngClass]="{
+                  'pi-star-fill': item.rating != null && i < item.rating,
+                  'pi-star': item.rating == null || i >= item.rating
+                }"></i>
               </ng-container>
             </span>
 
@@ -60,22 +47,12 @@
         <div class="flex items-end justify-between mt-2">
           <div>
             <div class="text-xl font-bold text-gray-900">{{ item.price | number }} ₸</div>
-            <div class="inline-block bg-yellow-300 text-gray-900 text-xs font-bold rounded px-2 py-0.5 mt-1">
+            <div class="bg-yellow-300 text-gray-900 text-xs font-bold rounded px-2 py-0.5 mt-1">
               {{ (item.price / 3) | number:'1.0-0' }} ₸ × 3
             </div>
           </div>
-
-          <button class="bg-blue-500 hover:bg-blue-600 text-white rounded-full p-2 ml-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7
-                13l-1.35 2.7A1 1 0 007 17h10a1 1 0
-                00.95-.68L21 13M7 13V6a1 1 0
-                011-1h5a1 1 0 011 1v7"/>
-            </svg>
-          </button>
         </div>
       </div>
     </div>
   </div>
 </div>
-

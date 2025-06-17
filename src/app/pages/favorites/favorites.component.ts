@@ -30,7 +30,7 @@ export class FavoritesComponent implements OnInit {
   constructor(private favService: FavoritesService) {}
 
   ngOnInit(): void {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('accessToken');
     this.favService.setAuthToken(token);
     this.loadFavorites();
   }
@@ -38,19 +38,38 @@ export class FavoritesComponent implements OnInit {
   private loadFavorites(): void {
     this.loading = true;
     this.favService.getFavorites().subscribe({
-      next: items => {
-        this.favorites = items.map(item => ({
-          id: item.id,
-          title: item.title,
-          description: item.description,
-          price: item.price,
-          imageUrl: item.images?.[0]?.startsWith('http')
-            ? item.images[0]
-            : this.apiBase + item.images?.[0],
-          categoryTitle: item.category?.title,
-          rating: item.rating || 0,
-          reviewsCount: item.reviewsCount || 0
-        }));
+      next: async (items) => {
+        const enrichedFavorites = await Promise.all(
+          items.map(async (item) => {
+            let rating: number | undefined = undefined;
+            let reviewsCount = 0;
+
+            try {
+              const reviews = (await this.favService.getReviews(item.id).toPromise()) || [];
+              reviewsCount = reviews.length;
+              rating = reviewsCount > 0
+                ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviewsCount
+                : undefined;
+            } catch (e) {
+              console.error('Ошибка загрузки отзывов:', e);
+            }
+
+            return {
+              id: item.id,
+              title: item.title,
+              description: item.description,
+              price: item.price,
+              imageUrl: item.images?.[0]?.startsWith('http')
+                ? item.images[0]
+                : this.apiBase + item.images?.[0],
+              categoryTitle: item.category?.title,
+              rating,
+              reviewsCount
+            };
+          })
+        );
+
+        this.favorites = enrichedFavorites;
         this.loading = false;
       },
       error: () => {
@@ -61,7 +80,17 @@ export class FavoritesComponent implements OnInit {
     });
   }
 
+
   removeFromFavorites(id: string): void {
-    this.favorites = this.favorites.filter(item => item.id !== id);
+    this.favService.toggleFavorite(id).subscribe({
+      next: () => {
+        this.favorites = this.favorites.filter(item => item.id !== id);
+      },
+      error: (error) => {
+        console.error('Ошибка удаления:', error);
+        this.errorMessage = 'Не удалось удалить товар из избранного.';
+      }
+    });
   }
+
 }

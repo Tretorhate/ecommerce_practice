@@ -35,4 +35,20 @@ export class FavoritesService {
       .get<{ favorites: ApiFavoriteItem[] }>(`${this.apiBase}/users/profile`, { headers })
       .pipe(map(response => response.favorites || []));
   }
+
+  getReviews(productId: string): Observable<{ rating: number }[]> {
+    return this.http.get<{ rating: number }[]>(`${this.apiBase}/reviews/${productId}`);
+  }
+
+
+  toggleFavorite(productId: string): Observable<any> {
+    const headers = this.authToken
+      ? new HttpHeaders().set('Authorization', 'Bearer ' + this.authToken)
+      : new HttpHeaders();
+
+    return this.http.patch(`${this.apiBase}/users/profile/favorites/${productId}`, {}, { headers });
+  }
+
+
+
 }
