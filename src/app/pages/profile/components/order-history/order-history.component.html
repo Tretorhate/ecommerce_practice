@@ -1,0 +1,38 @@
+<div class="bg-white rounded-xl shadow p-6 flex flex-col h-[700px] relative">
+
+  <h2 class="text-lg font-bold text-gray-800 mb-4 shrink-0">История заказов</h2>
+
+  @if (isOrdersLoading()) {
+    <span class="loader absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+      style="--loader-color: rgb(159, 159, 159); --loader-size: 64px"></span>
+  }
+
+  @else {
+
+    <div class="flex-1 overflow-y-auto pr-2 space-y-4 ">
+      @if (!orders().length) {
+          <div class="flex items-center justify-center h-full"> 
+          <h2 class="text-gray-500 text-center">У вас нет заказов</h2>
+        </div>
+      }
+      @else {
+        @for (order of orders(); track order.id) {
+          <div class="rounded-lg p-4 border border-blue-300 w-full">
+            <div class="flex justify-between items-center mb-3">
+              <span class="font-semibold text-blue-600">{{order.status | orderStatus}}</span>
+              <span class="text-gray-700 text-sm">{{ order.createdAt | date: 'dd.MM.yyyy' }}</span>
+            </div>
+
+            <ul class="space-y-2 mb-3">
+              @for (item of order.items; track item.id) {
+                <order-item [item]="item" />
+              }
+            </ul>
+
+            <div class="text-lg font-bold text-yellow-500 text-right">Итого: {{order.total}} ₸</div>
+          </div>
+        }
+      }
+    </div>
+  }
+</div>

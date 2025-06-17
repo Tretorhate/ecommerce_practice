@@ -1,7 +1,10 @@
 <header class="bg-white pt-2">
+  <app-cart-sidebar #cartSidebar [products]="products" (cartUpdated)="loadCart()"></app-cart-sidebar>
   <section class="flex px-6 py-4 justify-around items-center">
     <!-- Left: Logo -->
-    <img src="assets/svgs/Group.svg" alt="Group Icon" class="h-8" />
+    <a href="/">
+      <img src="assets/svgs/Group.svg" alt="Group Icon" class="h-8" />
+    </a>
 
     <!-- Center: Navigation links -->
     <nav class="flex gap-8 text-black/40 font-roboto text-base">
@@ -9,13 +12,20 @@
       <a href="#">Бизнесу</a>
       <a href="#">Ecommerce Гид</a>
     </nav>
-
+    
     <!-- Right: Cart -->
     <div class="flex items-center gap-1 text-black">
       <span class="text-sm">0</span>
       <span class="text-sm">KZT</span>
       <span class="pi pi-angle-down text-xl cursor-pointer"></span>
-      <span class="pi pi-shopping-cart text-xl cursor-pointer pl-4"></span>
+      <a href="/profile">
+      <img src="svg/profile.svg" alt="Профиль" class="w-7 h-7">
+    </a>
+
+      <button
+        (click)="cartSidebar.openSidebar()"
+        class="pi pi-shopping-cart text-xl cursor-pointer pl-4"
+      ></button>
     </div>
   </section>
 
@@ -51,3 +61,5 @@
   </section>
   <app-category-menu></app-category-menu>
 </header>
+
+

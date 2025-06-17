@@ -1,0 +1,70 @@
+<div
+  class="fixed inset-0 bg-gray-100 opacity-60 z-40"
+  (click)="close.emit()"
+></div>
+
+<div class="fixed inset-0 z-50 flex items-center justify-center px-4">
+  <div class="bg-white rounded-xl shadow-xl p-6 w-full max-w-lg relative">
+    <button
+      class="absolute top-3 right-3 text-gray-500 hover:text-gray-800 text-xl"
+      (click)="close.emit()"
+      aria-label="Закрыть"
+    >
+      &times;
+    </button>
+
+    <h3 class="text-lg font-semibold text-blue-900 mb-4">
+      Оставить отзыв на товар: <br />
+      <span class="text-black">{{ productTitle() }}</span>
+    </h3>
+
+    <form [formGroup]="reviewForm" (ngSubmit)="sendReview()" class="z-41">
+      <div class="mb-4">
+        <label for="rating" class="block text-blue-900 font-medium mb-1"
+          >Оценка:</label
+        >
+        <select
+          id="rating"
+          formControlName="rating"
+          class="w-full border border-blue-600 bg-white rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option value="5">5 — Отлично</option>
+          <option value="4">4 — Хорошо</option>
+          <option value="3">3 — Нормально</option>
+          <option value="2">2 — Плохо</option>
+          <option value="1">1 — Ужасно</option>
+        </select>
+      </div>
+
+      <textarea
+        class="w-full p-3 border border-blue-600 bg-white rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-400"
+        rows="4"
+        formControlName="text"
+        placeholder="Напишите свой отзыв о товаре..."
+      ></textarea>
+
+      <div class="text-right mt-4">
+        <button
+          type="submit"
+          [disabled]="isFormLoading()"
+          title="Отправить отзыв"
+          class="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition"
+        >
+          @if (isFormLoading()) {
+
+          <span
+            class="loader"
+            style="--loader-color: white; --loader-size: 24px"
+          ></span>
+          } @else { Отправить }
+        </button>
+      </div>
+      @if (formError().status || formError().statusText) {
+      <p class="text-red-400">
+        Ошибка при отправлении отзыва: <br />
+        {{ formError().statusText }} {{ formError().status }}
+      </p>
+      }
+    </form>
+  </div>
+</div>

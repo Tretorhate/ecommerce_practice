@@ -1,0 +1,23 @@
+<li class="border border-gray-300 rounded p-3 mb-4">
+  <div class="font-semibold text-gray-900">{{ item()?.product?.title }}</div>
+  <div class="text-gray-500 text-sm">
+   
+    {{ item()?.price }} ₸ x {{ item()?.quantity }} = <span class="text-gray-900 text-xl">{{ item()?.total }} ₸</span>
+  </div>
+
+  <button
+    (click)="toggleReviewForm()"
+    class="mt-4 text-white text-sm  bg-blue-700 p-1.5 rounded-md"
+  >
+    Оставить отзыв
+  </button>
+
+  @if (isItemReviewing()) {
+    <review-form
+    [productTitle]="item()?.product?.title"
+    (close)="toggleReviewForm()"
+     [productId]="item()?.product?.id"
+  [storeId]="item()?.storeId"
+    />
+  }
+</li>

@@ -1,11 +1,12 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { CategoryModalComponent } from './category-modal/category-modal.component';
 
 @Component({
   selector: 'app-category-menu',
   standalone: true,
-  imports: [CommonModule, CategoryModalComponent],
+  imports: [CommonModule, RouterModule, CategoryModalComponent],
   templateUrl: './category-menu.component.html',
 })
 export class CategoryMenuComponent {
