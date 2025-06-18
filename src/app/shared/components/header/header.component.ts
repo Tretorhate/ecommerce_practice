@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { CategoryMenuComponent } from '../../shared/common-ui/category-menu/category-menu.component';
-import { CartSidebarComponent } from '../cart-sidebar/cart-sidebar.component';
-import { CartService } from '../../shared/services/cart.service';
-import { OrderItem } from '../../shared/models/order-item.model';
+import { CategoryMenuComponent } from '../category-menu/category-menu.component';
+import { CartSidebarComponent } from '../../../pages/cart-sidebar/cart-sidebar.component';
+import { CartService } from '../../services/cart.service';
+import { OrderItem } from '../../models/order-item.model';
 
 @Component({
   selector: 'app-header',

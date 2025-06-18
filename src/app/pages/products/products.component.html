@@ -70,16 +70,15 @@
       <div
         class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-0 auto-rows-fr"
       >
-        @for (product of filteredProducts; track product.id) {
+        @if (filteredProducts$ | async; as $filteredProducts) { @for (product of
+        $filteredProducts; track product.id) {
         <app-product-card [product]="product"></app-product-card>
-        }
+        } @if ($filteredProducts.length === 0) {
+        <div class="text-center py-10 text-gray-500">
+          Нет товаров для отображения
+        </div>
+        } }
       </div>
-
-      @if (filteredProducts.length === 0) {
-      <div class="text-center py-10 text-gray-500">
-        Нет товаров для отображения
-      </div>
-      }
     </section>
   </div>
 </div>

@@ -15,7 +15,7 @@
         "
         (mouseenter)="setActiveCategory(cat.id)"
       >
-        <span class="text-sm font-medium">{{ cat.name }}</span>
+        <span class="text-sm font-medium">{{ cat.title }}</span>
         <span class="pi pi-angle-right text-gray-400 text-xs"></span>
       </div>
       }
@@ -37,33 +37,36 @@
         {{ currentCategory!.title }}
       </h1>
 
-      <!-- Sections -->
+      <!-- Children as sections -->
       <div class="flex flex-wrap gap-3 mb-8">
-        @for (sec of currentCategory!.sections ?? []; track sec.title) { @if
-        (sec.items == null) {
-        <div
-          class="text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded cursor-pointer transition-colors"
+        @for (child of currentCategory!.children ?? []; track child.id) {
+        <a
+          [routerLink]="['/c', child.id]"
+          class="text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded cursor-pointer transition-colors block"
         >
-          {{ sec.title }}
-        </div>
-        } }
+          {{ child.title }}
+        </a>
+        }
       </div>
 
-      <!-- Sections with items -->
+      <!-- Children with their own children -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-8">
-        @for (sec of currentCategory!.sections ?? []; track sec.title) { @if
-        (sec.items) {
+        @for (child of currentCategory!.children ?? []; track child.id) { @if
+        (child.children && child.children.length > 0) {
         <div class="pr-8 border-r border-gray-200 last:border-none">
-          <h2 class="text-lg font-bold text-gray-900 mb-4">{{ sec.title }}</h2>
+          <h2 class="text-lg font-bold text-gray-900 mb-4">
+            {{ child.title }}
+          </h2>
           <div
             class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-2"
           >
-            @for (item of sec.items!; track item) {
-            <div
-              class="text-blue-600 hover:text-blue-800 cursor-pointer text-sm"
+            @for (sub of child.children; track sub.id) {
+            <a
+              [routerLink]="['/c', sub.id]"
+              class="text-blue-600 hover:text-blue-800 cursor-pointer text-sm block"
             >
-              {{ item }}
-            </div>
+              {{ sub.title }}
+            </a>
             }
           </div>
         </div>

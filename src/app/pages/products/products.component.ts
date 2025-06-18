@@ -1,10 +1,15 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { CategoryFilterComponent } from '../../shared/common-ui/category-filter/category-filter.component';
-import { ProductCardComponent } from '../../shared/common-ui/product-card/product-card.component';
+import { CategoryFilterComponent } from '../../shared/components/category-filter/category-filter.component';
+import { ProductCardComponent } from '../../shared/components/product-card/product-card.component';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ProductItem } from '../../shared/models/product-item.model';
+import { Store } from '@ngrx/store';
+import { Observable, combineLatest, of } from 'rxjs';
+import { map, startWith, filter } from 'rxjs/operators';
+import { selectProducts } from '../../store/selectors/products.selectors';
+import { loadProducts } from '../../store/actions/products.actions';
 
 @Component({
   selector: 'app-products',
@@ -20,11 +25,9 @@ import { ProductItem } from '../../shared/models/product-item.model';
 export class ProductsComponent implements OnInit {
   selectedCategory: string | null = null;
 
-  // Price filter
   minPrice: number | null = null;
   maxPrice: number | null = null;
 
-  // Brand & seller filter
   brandOptions = [
     'Apple',
     'Samsung',
@@ -61,7 +64,7 @@ export class ProductsComponent implements OnInit {
     tv: ['tv-sets', 'audio'],
   };
 
-  products: ProductItem[] = [
+  placeholderProducts: ProductItem[] = [
     {
       id: 'p1',
       name: 'iPhone 14 Pro 128GB',
@@ -163,69 +166,112 @@ export class ProductsComponent implements OnInit {
     },
   ];
 
-  get filteredProducts(): ProductItem[] {
-    return this.products.filter((p) => {
-      let matchCategory = true;
-      if (this.selectedCategory) {
-        if (p.category === this.selectedCategory) {
-          matchCategory = true;
-        } else {
-          const descendants =
-            this.categoryHierarchy[this.selectedCategory] || [];
-          matchCategory = descendants.includes(p.category || '');
+  products$: Observable<ProductItem[]>;
+
+  filteredProducts$: Observable<ProductItem[]>;
+
+  constructor(
+    private route: ActivatedRoute,
+    private router: Router,
+    private store: Store
+  ) {
+    this.products$ = this.store.select(selectProducts).pipe(
+      map((storeProducts) => {
+        // If storeProducts is empty, return placeholder
+        if (!storeProducts || storeProducts.length === 0) {
+          return this.placeholderProducts;
         }
-      }
+        // Union: store products + placeholder products not in store
+        const storeIds = new Set(storeProducts.map((p) => p.id));
+        const merged = [
+          ...storeProducts,
+          ...this.placeholderProducts.filter((p) => !storeIds.has(p.id)),
+        ];
+        return merged;
+      })
+    );
 
-      const matchPriceMin =
-        this.minPrice != null ? p.price >= this.minPrice : true;
-      const matchPriceMax =
-        this.maxPrice != null ? p.price <= this.maxPrice : true;
-      const matchBrand = this.selectedBrands.size
-        ? this.selectedBrands.has(p.brand || '')
-        : true;
-      const matchSeller = this.selectedSellers.size
-        ? this.selectedSellers.has(p.seller || '')
-        : true;
-
-      return (
-        matchCategory &&
-        matchPriceMin &&
-        matchPriceMax &&
-        matchBrand &&
-        matchSeller
-      );
-    });
+    // Filtered products observable (will be set in ngOnInit)
+    this.filteredProducts$ = of([]);
   }
-
-  constructor(private route: ActivatedRoute, private router: Router) {}
 
   ngOnInit(): void {
-    this.route.queryParamMap.subscribe((params) => {
-      const cat = params.get('cat');
-      if (cat) {
-        this.selectedCategory = cat;
-      } else {
-        this.selectedCategory = null;
-      }
+    this.store.dispatch(loadProducts({}));
+
+    // Listen to route param and query param changes
+    this.route.paramMap.subscribe((params) => {
+      const category = params.get('category');
+      this.selectedCategory = category;
+      this.updateFiltersFromRoute();
+      this.updateFilteredProducts();
+    });
+    this.route.queryParamMap.subscribe(() => {
+      this.updateFiltersFromRoute();
+      this.updateFilteredProducts();
     });
   }
 
-  onCategorySelected(categoryId: string) {
-    if (categoryId === 'all') {
-      this.router.navigate([], {
-        relativeTo: this.route,
-        queryParams: {},
-        queryParamsHandling: 'merge',
-      });
-      this.selectedCategory = null;
-    } else {
-      this.router.navigate([], {
-        relativeTo: this.route,
-        queryParams: { cat: categoryId },
-        queryParamsHandling: 'merge',
-      });
-      this.selectedCategory = categoryId;
-    }
+  updateFiltersFromRoute() {
+    // Read query params for filters
+    const queryParams = this.route.snapshot.queryParamMap;
+    const minPrice = queryParams.get('minPrice');
+    const maxPrice = queryParams.get('maxPrice');
+    const brands = queryParams.getAll('brand');
+    const sellers = queryParams.getAll('seller');
+    this.minPrice = minPrice ? +minPrice : null;
+    this.maxPrice = maxPrice ? +maxPrice : null;
+    this.selectedBrands = new Set(brands);
+    this.selectedSellers = new Set(sellers);
+  }
+
+  updateFilteredProducts() {
+    this.filteredProducts$ = combineLatest([
+      this.products$,
+      of(this.selectedCategory),
+      of(this.minPrice),
+      of(this.maxPrice),
+      of(this.selectedBrands),
+      of(this.selectedSellers),
+    ]).pipe(
+      map(
+        ([
+          products,
+          selectedCategory,
+          minPrice,
+          maxPrice,
+          selectedBrands,
+          selectedSellers,
+        ]) => {
+          return products.filter((p) => {
+            let matchCategory = true;
+            if (selectedCategory) {
+              if (p.category === selectedCategory) {
+                matchCategory = true;
+              } else {
+                const descendants =
+                  this.categoryHierarchy[selectedCategory] || [];
+                matchCategory = descendants.includes(p.category || '');
+              }
+            }
+            const matchPriceMin = minPrice != null ? p.price >= minPrice : true;
+            const matchPriceMax = maxPrice != null ? p.price <= maxPrice : true;
+            const matchBrand = selectedBrands.size
+              ? selectedBrands.has(p.brand || '')
+              : true;
+            const matchSeller = selectedSellers.size
+              ? selectedSellers.has(p.seller || '')
+              : true;
+            return (
+              matchCategory &&
+              matchPriceMin &&
+              matchPriceMax &&
+              matchBrand &&
+              matchSeller
+            );
+          });
+        }
+      )
+    );
   }
 
   toggleBrand(brand: string, checked: boolean) {
@@ -234,6 +280,7 @@ export class ProductsComponent implements OnInit {
     } else {
       this.selectedBrands.delete(brand);
     }
+    this.updateRouteWithFilters();
   }
 
   toggleSeller(seller: string, checked: boolean) {
@@ -242,5 +289,32 @@ export class ProductsComponent implements OnInit {
     } else {
       this.selectedSellers.delete(seller);
     }
+    this.updateRouteWithFilters();
+  }
+
+  updateRouteWithFilters() {
+    // Update the route with current filters as query params
+    const queryParams: any = {};
+    if (this.minPrice != null) queryParams.minPrice = this.minPrice;
+    if (this.maxPrice != null) queryParams.maxPrice = this.maxPrice;
+    if (this.selectedBrands.size > 0)
+      queryParams.brand = Array.from(this.selectedBrands);
+    if (this.selectedSellers.size > 0)
+      queryParams.seller = Array.from(this.selectedSellers);
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams,
+      queryParamsHandling: 'merge',
+    });
+  }
+
+  trackByProductId(index: number, product: ProductItem) {
+    return product.id;
+  }
+
+  onCategorySelected(categoryId: string) {
+    this.selectedCategory = categoryId;
+    this.updateRouteWithFilters();
+    this.updateFilteredProducts();
   }
 }
