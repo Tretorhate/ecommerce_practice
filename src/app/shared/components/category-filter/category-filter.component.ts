@@ -5,83 +5,38 @@ import {
   Output,
   OnChanges,
   SimpleChanges,
+  inject,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
-interface CategoryItem {
-  id: string;
-  name: string;
-  subcategories?: CategoryItem[];
-  expanded?: boolean;
-}
+import { Category } from '../../models/category.model';
+import { CategoryService } from '../../services/category.service';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-category-filter',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './category-filter.component.html',
 })
 export class CategoryFilterComponent implements OnChanges {
   @Input() activeCategoryId: string | null = null;
   @Output() categorySelected = new EventEmitter<string>();
 
-  categories: CategoryItem[] = [
-    {
-      id: 'phones',
-      name: 'Телефоны и гаджеты',
-      expanded: false,
-      subcategories: [
-        {
-          id: 'smartphones',
-          name: 'Смартфоны',
-          expanded: false,
-          subcategories: [
-            { id: 'iphone', name: 'iPhone' },
-            { id: 'android', name: 'Android' },
-          ],
-        },
-        {
-          id: 'accessories',
-          name: 'Аксессуары',
-          expanded: false,
-          subcategories: [
-            { id: 'chargers', name: 'Зарядные устройства' },
-            { id: 'cases', name: 'Чехлы' },
-          ],
-        },
-      ],
-    },
-    {
-      id: 'appliances',
-      name: 'Бытовая техника',
-      expanded: false,
-      subcategories: [
-        {
-          id: 'large',
-          name: 'Крупная техника',
-        },
-        {
-          id: 'small',
-          name: 'Мелкая техника',
-        },
-      ],
-    },
-    {
-      id: 'tv',
-      name: 'ТВ, Аудио, Видео',
-      expanded: false,
-      subcategories: [
-        {
-          id: 'tv-sets',
-          name: 'Телевизоры',
-        },
-        {
-          id: 'audio',
-          name: 'Аудиосистемы',
-        },
-      ],
-    },
-  ];
+  categories: Category[] = [];
+  expanded: { [id: string]: boolean } = {};
+
+  private categoryService = inject(CategoryService);
+
+  constructor() {
+    this.categoryService.getCategories().subscribe((cats: unknown) => {
+      if (Array.isArray(cats)) {
+        this.categories = cats.filter(
+          (cat): cat is Category =>
+            !!cat && typeof cat === 'object' && 'id' in cat && !cat.parentId
+        );
+      }
+    });
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['activeCategoryId']) {
@@ -93,17 +48,13 @@ export class CategoryFilterComponent implements OnChanges {
   }
 
   private expandForCategory(id: string) {
-    const search = (
-      list: CategoryItem[],
-      parents: CategoryItem[] = []
-    ): boolean => {
+    const search = (list: Category[], parents: Category[] = []): boolean => {
       for (const item of list) {
         if (item.id === id) {
-          parents.forEach((p) => (p.expanded = true));
           return true;
         }
-        if (item.subcategories) {
-          if (search(item.subcategories, [...parents, item])) {
+        if (item.children) {
+          if (search(item.children, [...parents, item])) {
             return true;
           }
         }
@@ -113,8 +64,8 @@ export class CategoryFilterComponent implements OnChanges {
     search(this.categories);
   }
 
-  toggleCategory(cat: CategoryItem) {
-    cat.expanded = !cat.expanded;
+  toggleCategory(cat: Category) {
+    this.expanded[cat.id] = !this.expanded[cat.id];
   }
 
   selectCategory(id: string) {

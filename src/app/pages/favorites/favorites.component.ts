@@ -1,18 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FavoritesService } from '../../shared/services/favorites/favorites.service';
-import { baseUrl } from '../../core/interceptors/base-url';
-
-interface FavoriteItemView {
-  id: string;
-  title: string;
-  description?: string | null;
-  price: number;
-  imageUrl: string;
-  categoryTitle?: string;
-  rating?: number;
-  reviewsCount?: number;
-}
+import { ProductItem } from '../../shared/models/product-item.model';
+import { Review } from '../../shared/models/review.model';
 
 @Component({
   selector: 'app-favorites',
@@ -20,73 +9,18 @@ interface FavoriteItemView {
   imports: [CommonModule],
   templateUrl: './favorites.component.html',
 })
-export class FavoritesComponent implements OnInit {
-  favorites: FavoriteItemView[] = [];
-  loading = false;
-  errorMessage: string | null = null;
-
-  constructor(private favService: FavoritesService) {}
-
-  ngOnInit(): void {
-    this.loadFavorites();
-  }
-
-  private loadFavorites(): void {
-    this.loading = true;
-    this.favService.getFavorites().subscribe({
-      next: async (items) => {
-        const enrichedFavorites = await Promise.all(
-          items.map(async (item) => {
-            let rating: number | undefined = undefined;
-            let reviewsCount = 0;
-
-            try {
-              const reviews =
-                (await this.favService.getReviews(item.id).toPromise()) || [];
-              reviewsCount = reviews.length;
-              rating =
-                reviewsCount > 0
-                  ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviewsCount
-                  : undefined;
-            } catch (e) {
-              console.error('Ошибка загрузки отзывов:', e);
-            }
-
-            return {
-              id: item.id,
-              title: item.title,
-              description: item.description,
-              price: item.price,
-              imageUrl: item.images?.[0]?.startsWith('http')
-                ? item.images[0]
-                : baseUrl + item.images?.[0],
-              categoryTitle: item.category?.title,
-              rating,
-              reviewsCount,
-            };
-          }),
-        );
-
-        this.favorites = enrichedFavorites;
-        this.loading = false;
-      },
-      error: () => {
-        this.errorMessage = 'Не удалось загрузить избранное.';
-        this.favorites = [];
-        this.loading = false;
-      },
-    });
-  }
+export class FavoritesComponent {
+  favorites: ProductItem[] = [];
 
   removeFromFavorites(id: string): void {
-    this.favService.toggleFavorite(id).subscribe({
-      next: () => {
-        this.favorites = this.favorites.filter((item) => item.id !== id);
-      },
-      error: (error) => {
-        console.error('Ошибка удаления:', error);
-        this.errorMessage = 'Не удалось удалить товар из избранного.';
-      },
-    });
+    this.favorites = this.favorites.filter((item) => item.id !== id);
+  }
+
+  getAverageRating(reviews: Review[]): number {
+    if (!reviews || reviews.length === 0) {
+      return 0;
+    }
+    const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
+    return totalRating / reviews.length;
   }
 }

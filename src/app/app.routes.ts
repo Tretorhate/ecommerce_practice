@@ -15,14 +15,14 @@ export const routes: Routes = [
     canActivate: [authLoginGuard],
     loadComponent: () =>
       import('./pages/register/register.component').then(
-        (m) => m.RegisterComponent,
+        (m) => m.RegisterComponent
       ),
   },
   {
     path: '',
     loadComponent: () =>
       import('./core/layouts/main-layout/main-layout.component').then(
-        (m) => m.MainLayout,
+        (m) => m.MainLayout
       ),
     children: [
       {
@@ -36,14 +36,22 @@ export const routes: Routes = [
         title: 'Categories',
         loadComponent: () =>
           import('./pages/products/products.component').then(
-            (m) => m.ProductsComponent,
+            (m) => m.ProductsComponent
+          ),
+      },
+      {
+        path: 'c/:category',
+        title: 'Categories',
+        loadComponent: () =>
+          import('./pages/products/products.component').then(
+            (m) => m.ProductsComponent
           ),
       },
       {
         path: 'favorites',
         loadComponent: () =>
           import('./pages/favorites/favorites.component').then(
-            (m) => m.FavoritesComponent,
+            (m) => m.FavoritesComponent
           ),
       },
       {
@@ -51,14 +59,14 @@ export const routes: Routes = [
         canActivate: [authGuard],
         loadComponent: () =>
           import('./pages/profile/profile.component').then(
-            (m) => m.ProfileComponent,
+            (m) => m.ProfileComponent
           ),
       },
       {
         path: 'product/:id',
         loadComponent: () =>
           import('./pages/product-page/product-page.component').then(
-            (m) => m.ProductPageComponent,
+            (m) => m.ProductPageComponent
           ),
       },
       {
@@ -66,7 +74,7 @@ export const routes: Routes = [
         title: 'Not found',
         loadComponent: () =>
           import('./pages/notfound/notfound.component').then(
-            (m) => m.NotfoundComponent,
+            (m) => m.NotfoundComponent
           ),
       },
     ],

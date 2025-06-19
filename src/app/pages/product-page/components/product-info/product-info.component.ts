@@ -3,35 +3,62 @@ import { ProductReviewService } from '../../../../shared/services/product-review
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { CartService } from '../../../../shared/services/cart.service';
-import { FavoritesService } from '../../../../shared/services/favorites/favorites.service';
+import { ProductItem } from '../../../../shared/models/product-item.model';
+import { OrderItem } from '../../../../shared/models/order-item.model';
 @Component({
   selector: 'app-product-info',
   templateUrl: './product-info.component.html',
   imports: [CommonModule],
 })
 export class ProductInfoComponent implements OnInit {
-  product: {
-    id: string;
-    title: string;
-    price: number;
-    installmentPrice: number;
-    installmentCount: number;
-    image: string;
-    thumbnailImages: string[];
-  } = {
+  product: ProductItem = {
     id: '',
     title: '',
+    description: '',
     price: 0,
-    installmentPrice: 0,
-    installmentCount: 3,
-    image: '',
-    thumbnailImages: [],
+    images: [],
+    storeId: '',
+    categoryId: '',
+    createdAt: '',
+    updatedAt: '',
+    userId: null,
+    category: {
+      id: '',
+      parentId: null,
+      title: '',
+      description: '',
+    },
+    reviews: [],
+    store: {
+      id: '',
+      title: '',
+      description: null,
+      userId: '',
+      createdAt: '',
+      updatedAt: '',
+    },
   };
+
+  get installmentPrice(): number {
+    return Math.round(this.product.price / 3);
+  }
+
+  get installmentCount(): number {
+    return 3;
+  }
+
+  get mainImage(): string {
+    return this.product.images?.[0] || '';
+  }
+
+  get thumbnailImages(): string[] {
+    return this.product.images || [];
+  }
 
   constructor(
     private productReviewService: ProductReviewService,
     private route: ActivatedRoute,
-    private cartService: CartService,
+    private cartService: CartService
   ) {}
 
   private favoriteService = inject(FavoritesService);
@@ -41,22 +68,32 @@ export class ProductInfoComponent implements OnInit {
       this.productReviewService
         .fetchProductById(productId)
         .subscribe((data) => {
-          this.product.id = data.id;
-          this.product.title = data.title;
-          this.product.price = data.price;
-          this.product.installmentPrice = Math.round(data.price / 3);
-          this.product.image = data.images[0];
-          this.product.thumbnailImages = data.images;
+          this.product = { ...data };
         });
     }
   }
 
   changeMainImage(imageUrl: string) {
-    this.product.image = imageUrl;
+    // Update the first image in the array
+    if (this.product.images && this.product.images.length > 0) {
+      this.product.images[0] = imageUrl;
+    }
   }
 
   addToCart(productId: string) {
-    this.cartService.addToCart(productId);
+    const orderItem: OrderItem = {
+      id: this.product.id,
+      quantity: 1,
+      price: this.product.price,
+      total: this.product.price,
+      product: {
+        id: this.product.id,
+        title: this.product.title,
+        category: this.product.category?.title,
+      },
+      storeId: this.product.storeId,
+    };
+    this.cartService.addItem(orderItem).subscribe();
   }
   isFavorite = false;
 

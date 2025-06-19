@@ -1,48 +1,62 @@
 <div class="block">
-    <div class="flex gap-5 border  p-4 rounded-none bg-white max-w-[700px] relative">
-        <div class="shrink-0">
-        
-            <div class="w-full h-[1.2px] bg-white mb-2 mt-2"></div>
-        <img [src]="product.image" alt="product" class="w-[85px] h-auto" />
-        </div>
-
-        <div class="flex-grow">
-        <div class="w-full h-[1px] bg-[#eae7e7] mb-2 mt-2"></div>
-
-        <h3 class="text-[#0089D0] text-sm font-light m-0 w-55">{{ product.title }}</h3>
-        <div class="grid grid-cols-[minmax(75px,_max-content)_1fr] text-xs my-1 mb-1 gap-y-1">
-
-            <div class="text-[#888]">Цена</div>
-            <div class="text-[#888] pl-3 border-l border-[#ddd]">В рассрочку</div>
-            
-            <div class="font-medium text-base text-[#333]">
-                {{ totalPrice | number:'1.0-0' }} ₸ㅤ
-            </div>
-            
-            <div class="flex items-center text-base font-bold pl-3 border-l border-[#ddd]">
-                <span class="bg-[#ffd300] px-2 py-0.5 mr-1 text-[#333] text-sm font-normal">
-                {{ totalPrice / 3 | number:'1.0-0' }} ₸
-                </span>
-                <span class="text-[#a9a7a7] font-normal">×3</span>
-            </div>
-        </div>
-
-        <div class="text-green-600 flex items-center text-xs font-normal">
-            <span class="mr-1">🚛</span>
-            <span>бесплатно</span>
-        </div>
-        </div>
-
-        <div class="absolute right-3 bottom-2 flex items-center gap-2 text-black text-2xl font-normal">
-            <button 
-                (click)="decrement()" 
-                class="w-5 h-5 text-base font-bold border-2 border-[#333] bg-white rounded cursor-pointer leading-none flex items-center justify-center"
-            >−</button>
-            <span>{{ product.quantity }}</span>
-            <button 
-                (click)="increment()" 
-                class="w-5 h-5 text-base font-bold border-2 border-[#333] bg-white rounded cursor-pointer leading-none flex items-center justify-center"
-            >+</button>
-        </div>
+  <div
+    class="flex gap-5 border p-4 rounded-none bg-white max-w-[700px] relative"
+  >
+    <div class="shrink-0">
+      <div class="w-full h-[1.2px] bg-white mb-2 mt-2"></div>
+      <img [src]="productImage" alt="product" class="w-[85px] h-auto" />
     </div>
+
+    <div class="flex-grow">
+      <div class="w-full h-[1px] bg-[#eae7e7] mb-2 mt-2"></div>
+
+      <h3 class="text-[#0089D0] text-sm font-light m-0 w-55">
+        {{ product.title }}
+      </h3>
+      <div
+        class="grid grid-cols-[minmax(75px,_max-content)_1fr] text-xs my-1 mb-1 gap-y-1"
+      >
+        <div class="text-[#888]">Цена</div>
+        <div class="text-[#888] pl-3 border-l border-[#ddd]">В рассрочку</div>
+
+        <div class="font-medium text-base text-[#333]">
+          {{ totalPrice | number : "1.0-0" }} ₸ㅤ
+        </div>
+
+        <div
+          class="flex items-center text-base font-bold pl-3 border-l border-[#ddd]"
+        >
+          <span
+            class="bg-[#ffd300] px-2 py-0.5 mr-1 text-[#333] text-sm font-normal"
+          >
+            {{ totalPrice / 3 | number : "1.0-0" }} ₸
+          </span>
+          <span class="text-[#a9a7a7] font-normal">×3</span>
+        </div>
+      </div>
+
+      <div class="text-green-600 flex items-center text-xs font-normal">
+        <span class="mr-1">🚛</span>
+        <span>бесплатно</span>
+      </div>
+    </div>
+
+    <div
+      class="absolute right-3 bottom-2 flex items-center gap-2 text-black text-2xl font-normal"
+    >
+      <button
+        (click)="decrement()"
+        class="w-5 h-5 text-base font-bold border-2 border-[#333] bg-white rounded cursor-pointer leading-none flex items-center justify-center"
+      >
+        −
+      </button>
+      <span>{{ product.quantity }}</span>
+      <button
+        (click)="increment()"
+        class="w-5 h-5 text-base font-bold border-2 border-[#333] bg-white rounded cursor-pointer leading-none flex items-center justify-center"
+      >
+        +
+      </button>
+    </div>
+  </div>
 </div>

@@ -23,14 +23,14 @@ export class CartSidebarComponent {
   getTotalQuantity(): number {
     return this.products.reduce(
       (total, product) => total + (product.quantity || 1),
-      0,
+      0
     );
   }
 
   getTotalPrice(): number {
     return this.products.reduce(
       (total, product) => total + product.price * (product.quantity || 1),
-      0,
+      0
     );
   }
 

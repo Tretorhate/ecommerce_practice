@@ -4,15 +4,25 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 @Component({
   selector: 'app-cart-card',
   imports: [CommonModule],
-  templateUrl: './cart-card.component.html'
+  templateUrl: './cart-card.component.html',
 })
 export class CartCardComponent {
-  @Input() product!: { id: string; title: string; price: number; image: string; quantity: 1 };
+  @Input() product!: {
+    id: string;
+    title: string;
+    price: number;
+    images?: string[];
+    quantity: number;
+  };
   @Output() quantityChange = new EventEmitter<number>();
   @Output() removeProduct = new EventEmitter<string>();
 
   get totalPrice(): number {
     return this.product.price * this.product.quantity;
+  }
+
+  get productImage(): string {
+    return this.product.images?.[0] || '';
   }
 
   increment() {

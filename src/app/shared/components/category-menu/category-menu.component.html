@@ -9,11 +9,12 @@
       @for (category of categories; track category.id) {
       <li (mouseenter)="onCategoryHover(category.id)" class="relative">
         <a
-          [routerLink]="['/category']"
-          [queryParams]="category.id === 'all' ? null : { cat: category.id }"
+          [routerLink]="
+            category.id === 'all' ? ['/category'] : ['/c', category.id]
+          "
           class="hover:underline border-l border-[#0089D0] w-[106px] h-14 flex items-center justify-center text-center whitespace-normal text-sm"
         >
-          {{ category.name }}
+          {{ category.title }}
         </a>
       </li>
       }

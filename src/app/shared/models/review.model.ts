@@ -1,15 +1,23 @@
-export interface Review{
-    id: string,
-    createdAt: Date,
-    text: string,
-    rating: number,
-    product:{
-        title: string
-    },
-    user:{
-        name: string
-    },
-    store:{
-        title: string
-    }
+export interface Review {
+  id: string;
+  createdAt: string;
+  text: string;
+  rating: number;
+  productId: string;
+  userId: string;
+  storeId: string;
+  product?: {
+    id: string;
+    title: string;
+    images?: string[];
+  };
+  user: {
+    id: string;
+    name: string;
+    email: string;
+  };
+  store: {
+    id: string;
+    title: string;
+  };
 }

@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { CartService } from '../../services/cart.service';
-import { CartSidebarComponent } from '../cart-sidebar/cart-sidebar.component';
 import { CategoryMenuComponent } from '../category-menu/category-menu.component';
+import { CartSidebarComponent } from '../../../pages/cart-sidebar/cart-sidebar.component';
+import { CartService } from '../../services/cart.service';
+import { OrderItem } from '../../models/order-item.model';
 
 @Component({
   selector: 'app-header',
@@ -10,38 +11,35 @@ import { CategoryMenuComponent } from '../category-menu/category-menu.component'
 })
 export class HeaderComponent implements OnInit {
   products: any[] = [];
-  cart: string[] = [];
+  cart: OrderItem[] = [];
 
   constructor(private cartService: CartService) {}
 
   ngOnInit() {
-    this.cartService.cart$.subscribe((cart) => {
+    this.cartService.cart$.subscribe((cart: OrderItem[]) => {
       this.cart = cart;
       this.loadProducts();
     });
   }
 
-  loadCart() {
-    const cart = localStorage.getItem('cart');
-    this.cart = cart ? JSON.parse(cart) : [];
-  }
-
   loadProducts() {
     if (this.cart.length > 0) {
-      this.cartService.getProductsByIds(this.cart).subscribe(
-        (products) => {
-          this.products = products.map((product) => ({
-            id: product.id,
-            title: product.title,
-            price: product.price,
-            image: product.images[0],
-            quantity: 1,
-          }));
-        },
-        (error) => {
-          console.error('Error loading products:', error);
-        },
-      );
+      this.products = this.cart.map((orderItem) => ({
+        id: orderItem.product?.id || orderItem.id,
+        title: orderItem.product?.title || '',
+        price: orderItem.price,
+        image: '',
+        quantity: orderItem.quantity,
+      }));
+    } else {
+      this.products = [];
     }
+  }
+
+  loadCart() {
+    this.cartService.cart$.subscribe((cart: OrderItem[]) => {
+      this.cart = cart;
+      this.loadProducts();
+    });
   }
 }

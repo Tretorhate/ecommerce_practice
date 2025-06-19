@@ -7,13 +7,7 @@ import {
   animate,
   state,
 } from '@angular/animations';
-
-interface CategoryItem {
-  id: string;
-  title: string;
-  image: string;
-  alt: string;
-}
+import { Category } from '../../models/category.model';
 
 @Component({
   selector: 'app-category-carousel',
@@ -71,19 +65,16 @@ interface CategoryItem {
             (click)="onCategoryClick(category)"
           >
             <div class="flex flex-col items-center justify-center h-full p-6">
+              <img
+                [src]="category.image"
+                [alt]="category.alt || category.title"
+                class="w-32 h-32 object-contain mb-4"
+              />
               <h3
                 class="text-sm font-semibold text-gray-800 text-center leading-tight px-1 mb-4 uppercase"
               >
                 {{ category.title }}
               </h3>
-              <div class="w-40 h-40 overflow-hidden rounded-lg">
-                <img
-                  [src]="category.image"
-                  [alt]="category.alt"
-                  class="w-full h-full object-cover"
-                  loading="lazy"
-                />
-              </div>
             </div>
           </div>
           }
@@ -136,7 +127,7 @@ export class CategoryCarouselComponent implements AfterViewInit {
     return Math.ceil(this.categories.length / this.itemsPerSet);
   }
 
-  get currentCategories(): CategoryItem[] {
+  get currentCategories(): any[] {
     const startIndex = this.currentSetIndex * this.itemsPerSet;
     return this.categories.slice(startIndex, startIndex + this.itemsPerSet);
   }
@@ -147,7 +138,7 @@ export class CategoryCarouselComponent implements AfterViewInit {
       .map((_, i) => i);
   }
 
-  categories: CategoryItem[] = [
+  categories = [
     {
       id: '1',
       title: 'Телефоны и гаджеты',
@@ -289,12 +280,12 @@ export class CategoryCarouselComponent implements AfterViewInit {
     this.currentSetIndex = index;
   }
 
-  onCategoryClick(category: CategoryItem): void {
+  onCategoryClick(category: Category): void {
     console.log('Category clicked:', category);
     // Handle category navigation here
   }
 
-  trackByFn(index: number, item: CategoryItem): string {
+  trackByFn(index: number, item: any): string {
     return item.id;
   }
 }

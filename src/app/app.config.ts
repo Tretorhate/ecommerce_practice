@@ -13,6 +13,13 @@ import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
 import { APP_BASE_HREF } from '@angular/common';
+import { provideStore } from '@ngrx/store';
+import { provideEffects } from '@ngrx/effects';
+import { provideRouterStore } from '@ngrx/router-store';
+
+import { effects } from './store/effects';
+import { CustomRouterSerializer } from './store/state/router.state';
+import { reducers } from './store/reducers';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -26,11 +33,15 @@ export const appConfig: ApplicationConfig = {
     providePrimeNG({
       theme: {
         preset: Material,
-
         options: {
           darkModeSelector: '.dark-mode',
         },
       },
+    }),
+    provideStore(reducers),
+    provideEffects(effects),
+    provideRouterStore({
+      serializer: CustomRouterSerializer,
     }),
   ],
 };

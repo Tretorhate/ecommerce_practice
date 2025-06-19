@@ -4,42 +4,63 @@ import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { Subject } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 import { Review } from '../../models/review.model';
+import { ProductService } from '../product.service';
+import { ProductItem } from '../../models/product-item.model';
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ProductReviewService {
   private readonly http = inject(HttpClient);
   private readonly route = inject(ActivatedRoute);
+  private readonly productService = inject(ProductService);
 
   private readonly reviews$ = new BehaviorSubject<Review[]>([]);
   private readonly reviewsLoaded$ = new BehaviorSubject<boolean>(false);
-   private reviewSubmitted$ = new Subject<void>();
+  private reviewSubmitted$ = new Subject<void>();
 
   get reviewSubmitted() {
     return this.reviewSubmitted$.asObservable();
   }
 
-  fetchProductById(productId: string): Observable<{ id: string; title: string; price: number; images: string[] }> {
-    return this.http.get<{ id: string; title: string; price: number; images: string[] }>(`/products/by-id/${productId}`);
+  fetchProductById(productId: string): Observable<ProductItem> {
+    return this.productService.getProduct(productId);
   }
 
-postReview(productId: string,storeId:string, data: { text: string; rating: number }): Observable<any> {
-  
-  return this.http.post(`/reviews/${productId}/${storeId}`, data).pipe(
-    tap(() => {this.fetchReviews(productId).subscribe()
-       this.reviewSubmitted$.next();
-    })
-  );
-}
+  createReview(review: Review): Observable<Review> {
+    const productId = review.productId || '';
+    const storeId = review.storeId || '';
+    return this.http.post<Review>(`/reviews/${productId}/${storeId}`, review);
+  }
 
-fetchReviews(productId: string): Observable<Review[]> {
-  return this.http.get<Review[]>(`/reviews/${productId}`).pipe(
-    tap((reviews) => {
-      this.reviews$.next(reviews);
-      this.reviewsLoaded$.next(true);
-    })
-  );
-}
+  updateReview(reviewId: string, review: Review): Observable<Review> {
+    return this.http.put<Review>(`/reviews/${reviewId}`, review);
+  }
+
+  getProductReviews(productId: string): Observable<Review[]> {
+    return this.http.get<Review[]>(`/reviews/${productId}`);
+  }
+
+  postReview(
+    productId: string,
+    storeId: string,
+    data: { text: string; rating: number }
+  ): Observable<any> {
+    return this.http.post(`/reviews/${productId}/${storeId}`, data).pipe(
+      tap(() => {
+        this.fetchReviews(productId).subscribe();
+        this.reviewSubmitted$.next();
+      })
+    );
+  }
+
+  fetchReviews(productId: string): Observable<Review[]> {
+    return this.http.get<Review[]>(`/reviews/${productId}`).pipe(
+      tap((reviews) => {
+        this.reviews$.next(reviews);
+        this.reviewsLoaded$.next(true);
+      })
+    );
+  }
   getReviewsStream(): Observable<Review[]> {
     return this.reviews$.asObservable();
   }
@@ -47,5 +68,4 @@ fetchReviews(productId: string): Observable<Review[]> {
   areReviewsLoaded(): Observable<boolean> {
     return this.reviewsLoaded$.asObservable();
   }
-  
 }
