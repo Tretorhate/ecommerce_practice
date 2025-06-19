@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { CartService } from '../../services/cart.service';
+import { CartService } from '../../services/cart/cart.service';
 import { CartSidebarComponent } from '../cart-sidebar/cart-sidebar.component';
 import { CategoryMenuComponent } from '../category-menu/category-menu.component';
 
@@ -10,7 +10,7 @@ import { CategoryMenuComponent } from '../category-menu/category-menu.component'
 })
 export class HeaderComponent implements OnInit {
   products: any[] = [];
-  cart: string[] = [];
+  cart: { productId: string; storeId: string }[] = [];
 
   constructor(private cartService: CartService) {}
 
@@ -28,15 +28,21 @@ export class HeaderComponent implements OnInit {
 
   loadProducts() {
     if (this.cart.length > 0) {
-      this.cartService.getProductsByIds(this.cart).subscribe(
+      const productIds = this.cart.map((item) => item.productId).filter((id) => id); 
+      this.cartService.getProductsByIds(productIds).subscribe(
         (products) => {
-          this.products = products.map((product) => ({
-            id: product.id,
-            title: product.title,
-            price: product.price,
-            image: product.images[0],
-            quantity: 1,
-          }));
+          this.products = this.cart.map((cartItem) => {
+            const product = products.find((p) => p.id === cartItem.productId);
+            return {
+              id: product.id,
+              title: product.title,
+              price: product.price,
+              image: product.images[0],
+              quantity: 1,
+              storeId: cartItem.storeId,
+            };
+          });
+          console.log('Loaded products with storeId:', this.products); 
         },
         (error) => {
           console.error('Error loading products:', error);

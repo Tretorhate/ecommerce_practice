@@ -10,6 +10,12 @@
         <div class="w-full h-[1px] bg-[#eae7e7] mb-2 mt-2"></div>
 
         <h3 class="text-[#0089D0] text-sm font-light m-0 w-55">{{ product.title }}</h3>
+        <div class="text-[#888] text-xs mt-1">
+            <span>Артикул:</span> {{ product.id }}
+          </div>
+          <div class="text-[#888] text-[10px] mt-1">
+            <span>Магазин ID:</span> {{ storeId }}
+          </div>
         <div class="grid grid-cols-[minmax(75px,_max-content)_1fr] text-xs my-1 mb-1 gap-y-1">
 
             <div class="text-[#888]">Цена</div>

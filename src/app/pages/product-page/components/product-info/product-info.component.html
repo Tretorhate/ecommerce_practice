@@ -47,6 +47,16 @@
         </div>
         </div>
         <div class="w-full h-[1.1px] bg-[#eae7e7] mb-2 mt-2"></div>
+        <div class="mb-4">
+            <label for="store-select" class="block text-base font-medium text-gray-700">Выберите магазин:</label>
+            <select
+              id="store-select"
+              [(ngModel)]="selectedStoreId"
+              class="mt-1 block w-auto pl-3 pr-10 py-2 text-base border-gray-700 focus:outline-none focus:ring-gray-300 focus:border-gray-500 sm:text-lg text-gray-600 rounded-md"
+            >
+              <option *ngFor="let store of stores" [value]="store.id">{{ store.title }}</option>
+            </select>
+          </div>
         <div class="flex items-center gap-2 w-full">
             <button
                 class="bg-[#0089D0] hover:bg-[#0078B0] text-white font-medium py-3 rounded-md text-base flex-1 cursor-pointer"

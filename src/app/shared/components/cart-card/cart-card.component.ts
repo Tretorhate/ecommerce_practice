@@ -7,9 +7,10 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
   templateUrl: './cart-card.component.html'
 })
 export class CartCardComponent {
-  @Input() product!: { id: string; title: string; price: number; image: string; quantity: 1 };
+  @Input() product!: { id: string; title: string; price: number; image: string; quantity: 1; storeId: string }; 
+  @Input() storeId!: string; 
   @Output() quantityChange = new EventEmitter<number>();
-  @Output() removeProduct = new EventEmitter<string>();
+  @Output() removeProduct = new EventEmitter<{ productId: string; storeId: string }>();
 
   get totalPrice(): number {
     return this.product.price * this.product.quantity;
@@ -25,7 +26,7 @@ export class CartCardComponent {
       this.product.quantity--;
       this.quantityChange.emit(this.product.quantity);
     } else {
-      this.removeProduct.emit(this.product.id);
+      this.removeProduct.emit({ productId: this.product.id, storeId: this.product.storeId }); 
     }
   }
 }

@@ -2,12 +2,13 @@ import { Component, inject, OnInit } from '@angular/core';
 import { ProductReviewService } from '../../../../shared/services/product-review/product-review.service';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
-import { CartService } from '../../../../shared/services/cart.service';
+import { CartService } from '../../../../shared/services/cart/cart.service';
 import { FavoritesService } from '../../../../shared/services/favorites/favorites.service';
+import { FormsModule } from '@angular/forms';
 @Component({
   selector: 'app-product-info',
   templateUrl: './product-info.component.html',
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule ],
 })
 export class ProductInfoComponent implements OnInit {
   product: {
@@ -49,14 +50,33 @@ export class ProductInfoComponent implements OnInit {
           this.product.thumbnailImages = data.images;
         });
     }
+
+    this.getStores();
   }
 
   changeMainImage(imageUrl: string) {
     this.product.image = imageUrl;
   }
+  stores: { id: string; title: string }[] = [];
+  selectedStoreId: string | null = null;
+  getStores() {
+    this.cartService.getStores().subscribe((stores) => {
+      this.stores = stores;
+      if (stores.length > 0) {
+        this.selectedStoreId = stores[0].id;
+      }
+    });
+  }
+  selectStore(storeId: string) {
+    this.selectedStoreId = storeId;
+  }
 
   addToCart(productId: string) {
-    this.cartService.addToCart(productId);
+    if (this.selectedStoreId) {
+      this.cartService.addToCart(productId, this.selectedStoreId);
+    } else {
+      alert('Пожалуйста, выберите магазин.');
+    }
   }
   isFavorite = false;
 
