@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { ProductReviewService } from '../../../../shared/services/product-review/product-review.service';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
@@ -61,6 +61,7 @@ export class ProductInfoComponent implements OnInit {
     private cartService: CartService
   ) {}
 
+  private favoriteService = inject(FavoritesService);
   ngOnInit() {
     const productId = this.route.snapshot.paramMap.get('id') || '';
     if (productId) {
@@ -97,6 +98,6 @@ export class ProductInfoComponent implements OnInit {
   isFavorite = false;
 
   toggleFavorite() {
-    this.isFavorite = !this.isFavorite;
+    this.favoriteService.toggleFavorite(this.product.id);
   }
 }

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ProductItem } from '../../shared/models/product-item.model';
 import { Review } from '../../shared/models/review.model';

@@ -1,6 +1,6 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { CartCardComponent } from '../../shared/components/cart-card/cart-card.component';
 import { CommonModule } from '@angular/common';
+import { CartCardComponent } from '../cart-card/cart-card.component';
 
 @Component({
   selector: 'app-cart-sidebar',

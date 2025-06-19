@@ -15,7 +15,6 @@ import { CategoryService } from '../../shared/services/category.service';
 
 @Component({
   selector: 'app-products',
-  standalone: true,
   imports: [
     CommonModule,
     FormsModule,
