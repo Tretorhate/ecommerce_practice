@@ -7,8 +7,8 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
   templateUrl: './cart-card.component.html'
 })
 export class CartCardComponent {
-  @Input() product!: { id: string; title: string; price: number; image: string; quantity: 1; storeId: string }; 
-  @Input() storeId!: string; 
+  @Input() product!: { id: string; title: string; price: number; image: string; quantity: 1; storeId: string; storeTitle: string }; 
+  @Input() storeTitle!: string; 
   @Output() quantityChange = new EventEmitter<number>();
   @Output() removeProduct = new EventEmitter<{ productId: string; storeId: string }>();
 

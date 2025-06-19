@@ -25,29 +25,28 @@ export class HeaderComponent implements OnInit {
     const cart = localStorage.getItem('cart');
     this.cart = cart ? JSON.parse(cart) : [];
   }
-
+  
   loadProducts() {
-    if (this.cart.length > 0) {
-      const productIds = this.cart.map((item) => item.productId).filter((id) => id); 
-      this.cartService.getProductsByIds(productIds).subscribe(
-        (products) => {
-          this.products = this.cart.map((cartItem) => {
-            const product = products.find((p) => p.id === cartItem.productId);
-            return {
-              id: product.id,
-              title: product.title,
-              price: product.price,
-              image: product.images[0],
-              quantity: 1,
-              storeId: cartItem.storeId,
-            };
-          });
-          console.log('Loaded products with storeId:', this.products); 
-        },
-        (error) => {
-          console.error('Error loading products:', error);
-        },
-      );
-    }
+  if (this.cart.length > 0) {
+    const productIds = this.cart.map(item => item.productId).filter(id => id);
+
+    this.cartService.getProductsByIds(productIds).subscribe(products => {
+      this.cartService.getStores().subscribe(stores => {
+        this.products = this.cart.map(cartItem => {
+          const product = products.find(p => p.id === cartItem.productId);
+          const store = stores.find(s => s.id === cartItem.storeId);
+          return {
+            id: product.id,
+            title: product.title,
+            price: product.price,
+            image: product.images[0],
+            quantity: 1,
+            storeId: cartItem.storeId,
+            storeTitle: store ? store.title : cartItem.storeId,
+          };
+        });
+      });
+    });
   }
+}
 }
