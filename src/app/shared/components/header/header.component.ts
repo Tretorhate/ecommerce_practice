@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CategoryMenuComponent } from '../category-menu/category-menu.component';
-import { CartSidebarComponent } from '../../../pages/cart-sidebar/cart-sidebar.component';
+import { CartSidebarComponent } from '../cart-sidebar/cart-sidebar.component';
 import { CartService } from '../../services/cart.service';
 import { OrderItem } from '../../models/order-item.model';
 

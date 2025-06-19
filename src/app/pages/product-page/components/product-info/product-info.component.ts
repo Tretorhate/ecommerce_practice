@@ -5,6 +5,7 @@ import { ActivatedRoute } from '@angular/router';
 import { CartService } from '../../../../shared/services/cart.service';
 import { ProductItem } from '../../../../shared/models/product-item.model';
 import { OrderItem } from '../../../../shared/models/order-item.model';
+import { FavoritesService } from '../../../../shared/services/favorites/favorites.service';
 @Component({
   selector: 'app-product-info',
   templateUrl: './product-info.component.html',
