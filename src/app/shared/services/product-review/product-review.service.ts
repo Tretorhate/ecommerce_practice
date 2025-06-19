@@ -43,13 +43,13 @@ export class ProductReviewService {
   postReview(
     productId: string,
     storeId: string,
-    data: { text: string; rating: number }
+    data: { text: string; rating: number },
   ): Observable<any> {
     return this.http.post(`/reviews/${productId}/${storeId}`, data).pipe(
       tap(() => {
         this.fetchReviews(productId).subscribe();
         this.reviewSubmitted$.next();
-      })
+      }),
     );
   }
 
@@ -58,7 +58,7 @@ export class ProductReviewService {
       tap((reviews) => {
         this.reviews$.next(reviews);
         this.reviewsLoaded$.next(true);
-      })
+      }),
     );
   }
   getReviewsStream(): Observable<Review[]> {

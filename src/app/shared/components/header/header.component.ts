@@ -1,8 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { CategoryMenuComponent } from '../category-menu/category-menu.component';
+import { CartService } from '../../services/cart/cart.service';
 import { CartSidebarComponent } from '../cart-sidebar/cart-sidebar.component';
-import { CartService } from '../../services/cart.service';
-import { OrderItem } from '../../models/order-item.model';
+import { CategoryMenuComponent } from '../category-menu/category-menu.component';
 
 @Component({
   selector: 'app-header',
@@ -11,35 +10,46 @@ import { OrderItem } from '../../models/order-item.model';
 })
 export class HeaderComponent implements OnInit {
   products: any[] = [];
-  cart: OrderItem[] = [];
+
+  cart: { productId: string; storeId: string }[] = [];
 
   constructor(private cartService: CartService) {}
 
   ngOnInit() {
-    this.cartService.cart$.subscribe((cart: OrderItem[]) => {
+    this.cartService.cart$.subscribe((cart) => {
       this.cart = cart;
       this.loadProducts();
     });
+  }
+
+  loadCart() {
+    const cart = localStorage.getItem('cart');
+    this.cart = cart ? JSON.parse(cart) : [];
   }
 
   loadProducts() {
     if (this.cart.length > 0) {
-      this.products = this.cart.map((orderItem) => ({
-        id: orderItem.product?.id || orderItem.id,
-        title: orderItem.product?.title || '',
-        price: orderItem.price,
-        image: '',
-        quantity: orderItem.quantity,
-      }));
-    } else {
-      this.products = [];
-    }
-  }
+      const productIds = this.cart
+        .map((item) => item.productId)
+        .filter((id) => id);
 
-  loadCart() {
-    this.cartService.cart$.subscribe((cart: OrderItem[]) => {
-      this.cart = cart;
-      this.loadProducts();
-    });
+      this.cartService.getProductsByIds(productIds).subscribe((products) => {
+        this.cartService.getStores().subscribe((stores) => {
+          this.products = this.cart.map((cartItem) => {
+            const product = products.find((p) => p.id === cartItem.productId);
+            const store = stores.find((s) => s.id === cartItem.storeId);
+            return {
+              id: product.id,
+              title: product.title,
+              price: product.price,
+              image: product.images[0],
+              quantity: 1,
+              storeId: cartItem.storeId,
+              storeTitle: store ? store.title : cartItem.storeId,
+            };
+          });
+        });
+      });
+    }
   }
 }

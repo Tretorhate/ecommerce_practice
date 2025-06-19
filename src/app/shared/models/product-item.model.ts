@@ -5,7 +5,7 @@ export interface ProductItem {
   title: string;
   description: string;
   price: number;
-  images?: string[];
+  images: string[];
   storeId: string;
   categoryId: string;
   createdAt: string;
