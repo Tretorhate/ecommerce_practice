@@ -47,7 +47,7 @@ export class ReviewsEffects {
       this.actions$.pipe(
         ofType(ReviewsActions.createReviewSuccess),
         tap(({ review }) => {
-          this.router.navigate(['/products', review.product.id]);
+          this.router.navigate(['/products', review.productId]);
         })
       ),
     { dispatch: false }
@@ -74,7 +74,6 @@ export class ReviewsEffects {
     this.actions$.pipe(
       ofType(ReviewsActions.updateReview),
       mergeMap(({ reviewId, review }) => {
-        // Validate review update
         if (!review.text || review.text.length < 10) {
           return of(
             ReviewsActions.updateReviewFailure({

@@ -1,16 +1,29 @@
+import { Review } from './review.model';
+
 export interface ProductItem {
   id: string;
-  name?: string; // Used in product list/card
-  title?: string; // Used in product info
+  title: string;
+  description: string;
   price: number;
-  rating?: number;
-  imageUrl?: string; // Used in product list/card
-  image?: string; // Used in product info
-  images?: string[]; // Used in product info
-  thumbnailImages?: string[]; // Used in product info
-  category?: string;
-  brand?: string;
-  seller?: string;
-  installmentPrice?: number;
-  installmentCount?: number;
+  images?: string[];
+  storeId: string;
+  categoryId: string;
+  createdAt: string;
+  updatedAt: string;
+  userId: string | null;
+  category: {
+    id: string;
+    parentId: string | null;
+    title: string;
+    description: string;
+  };
+  reviews: Review[];
+  store: {
+    id: string;
+    title: string;
+    description: string | null;
+    userId: string;
+    createdAt: string;
+    updatedAt: string;
+  };
 }

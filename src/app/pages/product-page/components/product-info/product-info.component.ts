@@ -14,12 +14,46 @@ export class ProductInfoComponent implements OnInit {
   product: ProductItem = {
     id: '',
     title: '',
+    description: '',
     price: 0,
-    installmentPrice: 0,
-    installmentCount: 3,
-    image: '',
-    thumbnailImages: [],
+    images: [],
+    storeId: '',
+    categoryId: '',
+    createdAt: '',
+    updatedAt: '',
+    userId: null,
+    category: {
+      id: '',
+      parentId: null,
+      title: '',
+      description: '',
+    },
+    reviews: [],
+    store: {
+      id: '',
+      title: '',
+      description: null,
+      userId: '',
+      createdAt: '',
+      updatedAt: '',
+    },
   };
+
+  get installmentPrice(): number {
+    return Math.round(this.product.price / 3);
+  }
+
+  get installmentCount(): number {
+    return 3;
+  }
+
+  get mainImage(): string {
+    return this.product.images?.[0] || '';
+  }
+
+  get thumbnailImages(): string[] {
+    return this.product.images || [];
+  }
 
   constructor(
     private productReviewService: ProductReviewService,
@@ -33,18 +67,16 @@ export class ProductInfoComponent implements OnInit {
       this.productReviewService
         .fetchProductById(productId)
         .subscribe((data) => {
-          this.product.id = data.id;
-          this.product.title = data.title;
-          this.product.price = data.price;
-          this.product.installmentPrice = Math.round(data.price / 3);
-          this.product.image = data.images?.[0] || '';
-          this.product.thumbnailImages = data.images || [];
+          this.product = { ...data };
         });
     }
   }
 
   changeMainImage(imageUrl: string) {
-    this.product.image = imageUrl;
+    // Update the first image in the array
+    if (this.product.images && this.product.images.length > 0) {
+      this.product.images[0] = imageUrl;
+    }
   }
 
   addToCart(productId: string) {
@@ -55,10 +87,10 @@ export class ProductInfoComponent implements OnInit {
       total: this.product.price,
       product: {
         id: this.product.id,
-        title: this.product.title || this.product.name || '',
-        category: this.product.category,
+        title: this.product.title,
+        category: this.product.category?.title,
       },
-      storeId: '', // Set appropriately if available
+      storeId: this.product.storeId,
     };
     this.cartService.addItem(orderItem).subscribe();
   }

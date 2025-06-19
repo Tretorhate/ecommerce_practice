@@ -1,15 +1,23 @@
-import { ProductItem } from './product-item.model';
-
 export interface Review {
   id: string;
-  createdAt: Date;
+  createdAt: string;
   text: string;
   rating: number;
-  product: ProductItem;
+  productId: string;
+  userId: string;
+  storeId: string;
+  product?: {
+    id: string;
+    title: string;
+    images?: string[];
+  };
   user: {
+    id: string;
     name: string;
+    email: string;
   };
   store: {
+    id: string;
     title: string;
   };
 }

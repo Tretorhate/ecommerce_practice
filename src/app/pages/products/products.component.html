@@ -1,5 +1,5 @@
-<div class="max-w-[960px] mx-auto my-6 py-12">
-  <div class="flex gap-6">
+<div class="max-w-[960px] mx-auto my-6 py-12 min-h-screen">
+  <div class="flex gap-6 items-stretch">
     <!-- Left column: Filters -->
     <aside class="w-1/4 space-y-6">
       <!-- Category filter -->
@@ -27,58 +27,44 @@
           />
         </div>
       </div>
-
-      <!-- Brand filter -->
-      <div>
-        <h2 class="font-semibold mb-2">Бренд</h2>
-        <ul class="space-y-1 text-sm">
-          @for (brand of brandOptions; track brand) {
-          <li class="flex items-center gap-2">
-            <input
-              type="checkbox"
-              [checked]="selectedBrands.has(brand)"
-              (change)="toggleBrand(brand, $any($event.target).checked)"
-              class="accent-blue-600"
-            />
-            <span>{{ brand }}</span>
-          </li>
-          }
-        </ul>
-      </div>
-
-      <!-- Seller filter -->
-      <div>
-        <h2 class="font-semibold mb-2">Продавец</h2>
-        <ul class="space-y-1 text-sm">
-          @for (seller of sellerOptions; track seller) {
-          <li class="flex items-center gap-2">
-            <input
-              type="checkbox"
-              [checked]="selectedSellers.has(seller)"
-              (change)="toggleSeller(seller, $any($event.target).checked)"
-              class="accent-blue-600"
-            />
-            <span>{{ seller }}</span>
-          </li>
-          }
-        </ul>
-      </div>
     </aside>
 
     <!-- Right column: Products -->
-    <section class="flex-1">
+    <section class="flex-1 flex flex-col">
+      @if (filteredProducts$ | async; as $filteredProducts) { @if
+      ($filteredProducts.length > 0) {
       <div
-        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-0 auto-rows-fr"
+        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-0 auto-rows-fr flex-1"
       >
-        @if (filteredProducts$ | async; as $filteredProducts) { @for (product of
-        $filteredProducts; track product.id) {
+        @for (product of $filteredProducts; track product.id) {
         <app-product-card [product]="product"></app-product-card>
-        } @if ($filteredProducts.length === 0) {
-        <div class="text-center py-10 text-gray-500">
-          Нет товаров для отображения
-        </div>
-        } }
+        }
       </div>
+      } @else {
+      <div class="text-center p-12 flex-1 flex flex-col justify-center">
+        <div class="text-gray-400 text-6xl mb-4">📦</div>
+        <h3 class="text-xl font-semibold text-gray-600 mb-2">
+          Товары не найдены
+        </h3>
+        <p class="text-gray-500 mb-4">
+          Попробуйте изменить фильтры или категорию
+        </p>
+        <button
+          (click)="resetFilters()"
+          class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+        >
+          Сбросить фильтры
+        </button>
+      </div>
+      } } @else {
+      <div class="text-center py-20">
+        <div class="text-gray-400 text-6xl mb-4">⏳</div>
+        <h3 class="text-xl font-semibold text-gray-600 mb-2">
+          Загрузка товаров...
+        </h3>
+        <p class="text-gray-500">Пожалуйста, подождите</p>
+      </div>
+      }
     </section>
   </div>
 </div>

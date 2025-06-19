@@ -5,11 +5,13 @@ import { CategoryFilterComponent } from '../../shared/components/category-filter
 import { ProductCardComponent } from '../../shared/components/product-card/product-card.component';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ProductItem } from '../../shared/models/product-item.model';
+import { Category } from '../../shared/models/category.model';
 import { Store } from '@ngrx/store';
 import { Observable, combineLatest, of } from 'rxjs';
 import { map, startWith, filter } from 'rxjs/operators';
 import { selectProducts } from '../../store/selectors/products.selectors';
 import { loadProducts } from '../../store/actions/products.actions';
+import { CategoryService } from '../../shared/services/category.service';
 
 @Component({
   selector: 'app-products',
@@ -28,170 +30,19 @@ export class ProductsComponent implements OnInit {
   minPrice: number | null = null;
   maxPrice: number | null = null;
 
-  brandOptions = [
-    'Apple',
-    'Samsung',
-    'Xiaomi',
-    'Generic',
-    'LG',
-    'JBL',
-    'Philips',
-  ];
-  sellerOptions = [
-    'Apple Store',
-    'Samsung Official',
-    'Mi Shop',
-    'Case Shop',
-    'LG Store',
-    'ElectroWorld',
-  ];
-
-  selectedBrands = new Set<string>();
-  selectedSellers = new Set<string>();
-
-  private readonly categoryHierarchy: Record<string, string[]> = {
-    phones: [
-      'smartphones',
-      'accessories',
-      'iphone',
-      'android',
-      'chargers',
-      'cases',
-    ],
-    smartphones: ['iphone', 'android'],
-    accessories: ['chargers', 'cases'],
-    appliances: ['large', 'small'],
-    tv: ['tv-sets', 'audio'],
-  };
-
-  placeholderProducts: ProductItem[] = [
-    {
-      id: 'p1',
-      name: 'iPhone 14 Pro 128GB',
-      price: 999,
-      rating: 5,
-      imageUrl:
-        'https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=400&h=400&fit=crop&crop=center',
-      category: 'iphone',
-      brand: 'Apple',
-      seller: 'Apple Store',
-    },
-    {
-      id: 'p2',
-      name: 'Samsung Galaxy S23',
-      price: 899,
-      rating: 4,
-      imageUrl:
-        'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&h=400&fit=crop&crop=center',
-      category: 'android',
-      brand: 'Samsung',
-      seller: 'Samsung Official',
-    },
-    {
-      id: 'p3',
-      name: 'Xiaomi Mi 13',
-      price: 699,
-      rating: 4,
-      imageUrl:
-        'https://images.unsplash.com/photo-1574944985070-8f3ebc6b79d2?w=400&h=400&fit=crop&crop=center',
-      category: 'android',
-      brand: 'Xiaomi',
-      seller: 'Mi Shop',
-    },
-    {
-      id: 'p4',
-      name: 'Apple MagSafe Charger',
-      price: 39,
-      rating: 5,
-      imageUrl:
-        'https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=400&h=400&fit=crop&crop=center',
-      category: 'chargers',
-      brand: 'Apple',
-      seller: 'Apple Store',
-    },
-    {
-      id: 'p5',
-      name: 'Silicone Case for iPhone 14',
-      price: 29,
-      rating: 4,
-      imageUrl:
-        'https://images.unsplash.com/photo-1556656793-08538906a9f8?w=400&h=400&fit=crop&crop=center',
-      category: 'cases',
-      brand: 'Generic',
-      seller: 'Case Shop',
-    },
-    {
-      id: 'p6',
-      name: 'LG OLED TV 55"',
-      price: 1599,
-      rating: 5,
-      imageUrl:
-        'https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?w=400&h=400&fit=crop&crop=center',
-      category: 'tv-sets',
-      brand: 'LG',
-      seller: 'LG Store',
-    },
-    {
-      id: 'p7',
-      name: 'JBL Flip 6 Bluetooth Speaker',
-      price: 129,
-      rating: 4,
-      imageUrl:
-        'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=400&h=400&fit=crop&crop=center',
-      category: 'audio',
-      brand: 'JBL',
-      seller: 'ElectroWorld',
-    },
-    {
-      id: 'p8',
-      name: 'Samsung Double Door Refrigerator',
-      price: 899,
-      rating: 4,
-      imageUrl:
-        'https://images.unsplash.com/photo-1571175443880-49e1d25b2bc5?w=400&h=400&fit=crop&crop=center',
-      category: 'large',
-      brand: 'Samsung',
-      seller: 'Samsung Official',
-    },
-    {
-      id: 'p9',
-      name: 'Philips Steam Iron',
-      price: 59,
-      rating: 4,
-      imageUrl:
-        'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=400&fit=crop&crop=center',
-      category: 'small',
-      brand: 'Philips',
-      seller: 'ElectroWorld',
-    },
-  ];
-
   products$: Observable<ProductItem[]>;
-
+  categories$: Observable<Category[]>;
   filteredProducts$: Observable<ProductItem[]>;
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private store: Store
+    private store: Store,
+    private categoryService: CategoryService
   ) {
-    this.products$ = this.store.select(selectProducts).pipe(
-      map((storeProducts) => {
-        // If storeProducts is empty, return placeholder
-        if (!storeProducts || storeProducts.length === 0) {
-          return this.placeholderProducts;
-        }
-        // Union: store products + placeholder products not in store
-        const storeIds = new Set(storeProducts.map((p) => p.id));
-        const merged = [
-          ...storeProducts,
-          ...this.placeholderProducts.filter((p) => !storeIds.has(p.id)),
-        ];
-        return merged;
-      })
-    );
+    this.products$ = this.store.select(selectProducts);
+    this.categories$ = this.categoryService.getCategories();
 
-    // Filtered products observable (will be set in ngOnInit)
     this.filteredProducts$ = of([]);
   }
 
@@ -216,91 +67,135 @@ export class ProductsComponent implements OnInit {
     const queryParams = this.route.snapshot.queryParamMap;
     const minPrice = queryParams.get('minPrice');
     const maxPrice = queryParams.get('maxPrice');
-    const brands = queryParams.getAll('brand');
-    const sellers = queryParams.getAll('seller');
     this.minPrice = minPrice ? +minPrice : null;
     this.maxPrice = maxPrice ? +maxPrice : null;
-    this.selectedBrands = new Set(brands);
-    this.selectedSellers = new Set(sellers);
+  }
+
+  // Helper method to get all descendant category IDs (including the category itself)
+  private getCategoryAndDescendants(
+    categoryId: string,
+    categories: Category[]
+  ): string[] {
+    const result: string[] = [categoryId];
+
+    const findCategory = (
+      cats: Category[],
+      targetId: string
+    ): Category | null => {
+      for (const cat of cats) {
+        if (cat.id === targetId) {
+          return cat;
+        }
+        if (cat.children) {
+          const found = findCategory(cat.children, targetId);
+          if (found) return found;
+        }
+      }
+      return null;
+    };
+
+    const category = findCategory(categories, categoryId);
+    if (category && category.children) {
+      for (const child of category.children) {
+        result.push(...this.getCategoryAndDescendants(child.id, categories));
+      }
+    }
+
+    return result;
   }
 
   updateFilteredProducts() {
     this.filteredProducts$ = combineLatest([
       this.products$,
+      this.categories$,
       of(this.selectedCategory),
       of(this.minPrice),
       of(this.maxPrice),
-      of(this.selectedBrands),
-      of(this.selectedSellers),
     ]).pipe(
-      map(
-        ([
-          products,
-          selectedCategory,
-          minPrice,
-          maxPrice,
-          selectedBrands,
-          selectedSellers,
-        ]) => {
-          return products.filter((p) => {
-            let matchCategory = true;
-            if (selectedCategory) {
-              if (p.category === selectedCategory) {
-                matchCategory = true;
-              } else {
-                const descendants =
-                  this.categoryHierarchy[selectedCategory] || [];
-                matchCategory = descendants.includes(p.category || '');
+      map(([products, categories, selectedCategory, minPrice, maxPrice]) => {
+        return products.filter((p) => {
+          let matchCategory = true;
+
+          if (selectedCategory) {
+            const allowedCategoryIds = this.getCategoryAndDescendants(
+              selectedCategory,
+              categories
+            );
+
+            matchCategory = allowedCategoryIds.includes(p.categoryId);
+
+            if (!matchCategory) {
+              const selectedCategoryObj = this.findCategoryById(
+                selectedCategory,
+                categories
+              );
+              if (selectedCategoryObj) {
+                if (p.category?.title === selectedCategoryObj.title) {
+                  matchCategory = true;
+                } else {
+                  const descendantTitles = this.getCategoryAndDescendantTitles(
+                    selectedCategoryObj,
+                    categories
+                  );
+                  matchCategory = descendantTitles.includes(
+                    p.category?.title || ''
+                  );
+                }
               }
             }
-            const matchPriceMin = minPrice != null ? p.price >= minPrice : true;
-            const matchPriceMax = maxPrice != null ? p.price <= maxPrice : true;
-            const matchBrand = selectedBrands.size
-              ? selectedBrands.has(p.brand || '')
-              : true;
-            const matchSeller = selectedSellers.size
-              ? selectedSellers.has(p.seller || '')
-              : true;
-            return (
-              matchCategory &&
-              matchPriceMin &&
-              matchPriceMax &&
-              matchBrand &&
-              matchSeller
-            );
-          });
-        }
-      )
+          }
+
+          const matchPriceMin = minPrice != null ? p.price >= minPrice : true;
+          const matchPriceMax = maxPrice != null ? p.price <= maxPrice : true;
+
+          return matchCategory && matchPriceMin && matchPriceMax;
+        });
+      })
     );
   }
 
-  toggleBrand(brand: string, checked: boolean) {
-    if (checked) {
-      this.selectedBrands.add(brand);
-    } else {
-      this.selectedBrands.delete(brand);
+  private findCategoryById(
+    categoryId: string,
+    categories: Category[]
+  ): Category | null {
+    for (const cat of categories) {
+      if (cat.id === categoryId) {
+        return cat;
+      }
+      if (cat.children) {
+        const found = this.findCategoryById(categoryId, cat.children);
+        if (found) return found;
+      }
     }
-    this.updateRouteWithFilters();
+    return null;
   }
 
-  toggleSeller(seller: string, checked: boolean) {
-    if (checked) {
-      this.selectedSellers.add(seller);
-    } else {
-      this.selectedSellers.delete(seller);
+  private getCategoryAndDescendantTitles(
+    category: Category,
+    allCategories: Category[]
+  ): string[] {
+    const result: string[] = [category.title];
+
+    if (category.children) {
+      for (const child of category.children) {
+        result.push(child.title);
+        result.push(
+          ...this.getCategoryAndDescendantTitles(child, allCategories)
+        );
+      }
     }
-    this.updateRouteWithFilters();
+
+    return result;
+  }
+
+  trackByProductId(index: number, product: ProductItem) {
+    return product.id;
   }
 
   updateRouteWithFilters() {
-    // Update the route with current filters as query params
     const queryParams: any = {};
     if (this.minPrice != null) queryParams.minPrice = this.minPrice;
     if (this.maxPrice != null) queryParams.maxPrice = this.maxPrice;
-    if (this.selectedBrands.size > 0)
-      queryParams.brand = Array.from(this.selectedBrands);
-    if (this.selectedSellers.size > 0)
-      queryParams.seller = Array.from(this.selectedSellers);
     this.router.navigate([], {
       relativeTo: this.route,
       queryParams,
@@ -308,8 +203,12 @@ export class ProductsComponent implements OnInit {
     });
   }
 
-  trackByProductId(index: number, product: ProductItem) {
-    return product.id;
+  resetFilters() {
+    this.selectedCategory = null;
+    this.minPrice = null;
+    this.maxPrice = null;
+    this.updateFilteredProducts();
+    this.router.navigate(['/category']);
   }
 
   onCategorySelected(categoryId: string) {

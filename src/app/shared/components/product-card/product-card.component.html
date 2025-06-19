@@ -1,9 +1,12 @@
-<div
-  class="relative h-full border border-gray-200 overflow-hidden flex flex-col"
+<a
+  class="relative h-full border border-gray-200 overflow-hidden flex flex-col cursor-pointer"
+  [routerLink]="['/product', product.id]"
 >
   <!-- Favorite heart -->
   <button
-    (click)="toggleFavorite()"
+    (click)="
+      toggleFavorite(); $event.stopPropagation(); $event.preventDefault()
+    "
     class="absolute top-2 right-2 z-10 p-1 rounded-full bg-white/80 hover:bg-white"
   >
     <svg
@@ -36,17 +39,17 @@
   </button>
 
   <img
-    [src]="product.imageUrl"
-    [alt]="product.name"
+    [src]="product.images?.[0]"
+    [alt]="product.title"
     class="w-full h-48 object-cover"
   />
 
   <div class="p-4 flex flex-col flex-1">
-    <h3 class="font-semibold mb-2 line-clamp-2">{{ product.name }}</h3>
+    <h3 class="font-semibold mb-2 line-clamp-2">{{ product.title }}</h3>
     <div class="flex items-center mb-2">
       <ng-container *ngFor="let _ of stars; let i = index">
         <svg
-          *ngIf="i < (product.rating ?? 0); else emptyStar"
+          *ngIf="i < rating; else emptyStar"
           class="w-4 h-4 text-yellow-400 fill-current"
           viewBox="0 0 20 20"
         >
@@ -86,4 +89,4 @@
       </div>
     </div>
   </div>
-</div>
+</a>

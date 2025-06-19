@@ -27,8 +27,8 @@ export class ProductReviewService {
   }
 
   createReview(review: Review): Observable<Review> {
-    const productId = review.product?.id || '';
-    const storeId = review.store?.title || '';
+    const productId = review.productId || '';
+    const storeId = review.storeId || '';
     return this.http.post<Review>(`/reviews/${productId}/${storeId}`, review);
   }
 
