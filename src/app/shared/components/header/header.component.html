@@ -1,5 +1,9 @@
 <header class="bg-white pt-2">
-  <app-cart-sidebar #cartSidebar [products]="products" (cartUpdated)="loadCart()"></app-cart-sidebar>
+  <app-cart-sidebar
+    #cartSidebar
+    [products]="products"
+    (cartUpdated)="loadCart()"
+  ></app-cart-sidebar>
   <section class="flex px-6 py-4 justify-around items-center">
     <!-- Left: Logo -->
     <a href="/">
@@ -12,22 +16,24 @@
       <a href="#">Бизнесу</a>
       <a href="#">Ecommerce Гид</a>
     </nav>
-    
+
     <!-- Right: Cart -->
     <div class="flex items-center gap-1 text-black">
       <span class="text-sm">0</span>
       <span class="text-sm">KZT</span>
       <span class="pi pi-angle-down text-xl cursor-pointer"></span>
       <a href="/profile">
-      <img src="svg/profile.svg" alt="Профиль" class="w-7 h-7">
-    </a>
+        <img src="svg/profile.svg" alt="Профиль" class="w-7 h-7" />
+      </a>
       @if (isLoggedIn()) {
-        <button class="mx-3 hover:text-blue-700" (click)="onLogout() ">Выйти</button>
-      }
+      <button class="mx-3 hover:text-blue-700" (click)="onLogout()">
+        Выйти
+      </button>
       <button
         (click)="cartSidebar.openSidebar()"
         class="pi pi-shopping-cart text-xl cursor-pointer pl-4"
       ></button>
+      }
     </div>
   </section>
 
@@ -63,5 +69,3 @@
   </section>
   <app-category-menu></app-category-menu>
 </header>
-
-
