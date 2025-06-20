@@ -10,6 +10,24 @@ export const initialState: CartState = {
 
 export const cartReducer = createReducer(
   initialState,
+  // Load cart from localStorage
+  on(CartActions.loadCart, (state) => ({
+    ...state,
+    loading: true,
+    error: null,
+  })),
+  on(CartActions.loadCartSuccess, (state, { items }) => ({
+    ...state,
+    items,
+    loading: false,
+    error: null,
+  })),
+  on(CartActions.loadCartFailure, (state, { error }) => ({
+    ...state,
+    loading: false,
+    error,
+  })),
+
   // Add item to cart
   on(CartActions.addToCart, (state) => ({
     ...state,
@@ -57,7 +75,9 @@ export const cartReducer = createReducer(
     (state, { itemId, quantity }) => ({
       ...state,
       items: state.items.map((item) =>
-        item.id === itemId ? { ...item, quantity } : item
+        item.id === itemId
+          ? { ...item, quantity, total: item.price * quantity }
+          : item
       ),
       loading: false,
       error: null,

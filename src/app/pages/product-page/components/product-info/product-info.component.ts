@@ -2,43 +2,23 @@ import { Component, inject, OnInit } from '@angular/core';
 import { ProductReviewService } from '../../../../shared/services/product-review/product-review.service';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
-import { CartService } from '../../../../shared/services/cart.service';
+import { Store } from '@ngrx/store';
 import { ProductItem } from '../../../../shared/models/product-item.model';
-import { OrderItem } from '../../../../shared/models/order-item.model';
 import { FavoritesService } from '../../../../shared/services/favorites/favorites.service';
+import * as CartActions from '../../../../store/actions/cart.actions';
+import { CartService } from '../../../../shared/services/cart.service';
+import { CartSidebarService } from '../../../../shared/services/cart-sidebar.service';
+import { ProductService } from '../../../../shared/services/product.service';
+
 @Component({
   selector: 'app-product-info',
   templateUrl: './product-info.component.html',
   imports: [CommonModule],
 })
 export class ProductInfoComponent implements OnInit {
-  product: ProductItem = {
-    id: '',
-    title: '',
-    description: '',
-    price: 0,
-    images: [],
-    storeId: '',
-    categoryId: '',
-    createdAt: '',
-    updatedAt: '',
-    userId: null,
-    category: {
-      id: '',
-      parentId: null,
-      title: '',
-      description: '',
-    },
-    reviews: [],
-    store: {
-      id: '',
-      title: '',
-      description: null,
-      userId: '',
-      createdAt: '',
-      updatedAt: '',
-    },
-  };
+  product!: ProductItem;
+  isFavorite = false;
+  private apiUrl = 'https://practiceapi.mooo.com';
 
   get installmentPrice(): number {
     return Math.round(this.product.price / 3);
@@ -48,57 +28,87 @@ export class ProductInfoComponent implements OnInit {
     return 3;
   }
 
-  get mainImage(): string {
-    return this.product.images?.[0] || '';
-  }
-
-  get thumbnailImages(): string[] {
-    return this.product.images || [];
-  }
-
   constructor(
     private productReviewService: ProductReviewService,
     private route: ActivatedRoute,
-    private cartService: CartService
+    private store: Store,
+    private favoritesService: FavoritesService,
+    private cartService: CartService,
+    private cartSidebarService: CartSidebarService,
+    private productService: ProductService
   ) {}
 
-  private favoriteService = inject(FavoritesService);
   ngOnInit() {
-    const productId = this.route.snapshot.paramMap.get('id') || '';
-    if (productId) {
-      this.productReviewService
-        .fetchProductById(productId)
-        .subscribe((data) => {
-          this.product = { ...data };
+    this.route.paramMap.subscribe((params) => {
+      const productId = params.get('id');
+      if (productId) {
+        this.productService.getProduct(productId).subscribe({
+          next: (product) => {
+            this.product = product;
+          },
+          error: (error) => {
+            console.error('Error loading product:', error);
+          },
         });
-    }
+      }
+    });
   }
 
   changeMainImage(imageUrl: string) {
-    // Update the first image in the array
-    if (this.product.images && this.product.images.length > 0) {
-      this.product.images[0] = imageUrl;
+    // This method can be used to change the main image when clicking thumbnails
+    // For now, we'll just log it
+    console.log('Changing main image to:', imageUrl);
+  }
+
+  onImageError(event: Event) {
+    const target = event.target as HTMLImageElement;
+    console.error('Image failed to load:', target.src);
+    if (target) {
+      target.style.display = 'none';
     }
   }
 
-  addToCart(productId: string) {
-    const orderItem: OrderItem = {
-      id: this.product.id,
-      quantity: 1,
-      price: this.product.price,
-      total: this.product.price,
-      product: {
-        id: this.product.id,
-        title: this.product.title,
-        category: this.product.category?.title,
-      },
-      storeId: this.product.storeId,
-    };
-    this.cartService.addItem(orderItem).subscribe();
-  }
-  isFavorite = false;
-
   toggleFavorite() {
-    this.favoriteService.toggleFavorite(this.product.id);
+    this.favoritesService.toggleFavorite(this.product.id).subscribe(() => {
+      this.isFavorite = !this.isFavorite;
+    });
+  }
+
+  addToCart(productId: string) {
+    const cartItem = this.cartService.createCartItemFromProduct(
+      this.product,
+      1
+    );
+    this.store.dispatch(CartActions.addToCart({ item: cartItem }));
+    this.cartSidebarService.openSidebar();
+  }
+
+  get mainImage(): string {
+    const imageUrl = this.product?.images?.[0] || '';
+    if (!imageUrl) return '';
+
+    // If the image URL is already absolute, return it as is
+    if (imageUrl.startsWith('http')) {
+      return imageUrl;
+    }
+
+    // If it's a relative path, add the base URL
+    return `${this.apiUrl}${imageUrl}`;
+  }
+
+  get thumbnailImages(): string[] {
+    if (!this.product?.images) return [];
+
+    return this.product.images.map((imageUrl) => {
+      if (!imageUrl) return '';
+
+      // If the image URL is already absolute, return it as is
+      if (imageUrl.startsWith('http')) {
+        return imageUrl;
+      }
+
+      // If it's a relative path, add the base URL
+      return `${this.apiUrl}${imageUrl}`;
+    });
   }
 }

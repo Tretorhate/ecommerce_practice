@@ -12,6 +12,7 @@ import { map, startWith, filter } from 'rxjs/operators';
 import { selectProducts } from '../../store/selectors/products.selectors';
 import { loadProducts } from '../../store/actions/products.actions';
 import { CategoryService } from '../../shared/services/category.service';
+import { StoreService, StoreFilter } from '../../shared/services/store.service';
 
 @Component({
   selector: 'app-products',
@@ -29,18 +30,33 @@ export class ProductsComponent implements OnInit {
   minPrice: number | null = null;
   maxPrice: number | null = null;
 
+  selectedStores: string[] = [];
+  selectedRatings: number[] = [];
+
   products$: Observable<ProductItem[]>;
   categories$: Observable<Category[]>;
+  stores$: Observable<StoreFilter[]>;
   filteredProducts$: Observable<ProductItem[]>;
+
+  // Available rating options
+  ratingOptions = [
+    { value: 5, label: '5 звезд' },
+    { value: 4, label: '4+ звезды' },
+    { value: 3, label: '3+ звезды' },
+    { value: 2, label: '2+ звезды' },
+    { value: 1, label: '1+ звезда' },
+  ];
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private store: Store,
-    private categoryService: CategoryService
+    private categoryService: CategoryService,
+    private storeService: StoreService
   ) {
     this.products$ = this.store.select(selectProducts);
     this.categories$ = this.categoryService.getCategories();
+    this.stores$ = this.storeService.getStores();
 
     this.filteredProducts$ = of([]);
   }
@@ -66,8 +82,13 @@ export class ProductsComponent implements OnInit {
     const queryParams = this.route.snapshot.queryParamMap;
     const minPrice = queryParams.get('minPrice');
     const maxPrice = queryParams.get('maxPrice');
+    const stores = queryParams.get('stores');
+    const ratings = queryParams.get('ratings');
+
     this.minPrice = minPrice ? +minPrice : null;
     this.maxPrice = maxPrice ? +maxPrice : null;
+    this.selectedStores = stores ? stores.split(',') : [];
+    this.selectedRatings = ratings ? ratings.split(',').map((r) => +r) : [];
   }
 
   // Helper method to get all descendant category IDs (including the category itself)
@@ -103,6 +124,18 @@ export class ProductsComponent implements OnInit {
     return result;
   }
 
+  // Helper method to calculate product rating
+  private calculateProductRating(product: ProductItem): number {
+    if (!product.reviews || product.reviews.length === 0) {
+      return 0;
+    }
+    const totalRating = product.reviews.reduce(
+      (sum, review) => sum + review.rating,
+      0
+    );
+    return Math.round(totalRating / product.reviews.length);
+  }
+
   updateFilteredProducts() {
     this.filteredProducts$ = combineLatest([
       this.products$,
@@ -110,46 +143,73 @@ export class ProductsComponent implements OnInit {
       of(this.selectedCategory),
       of(this.minPrice),
       of(this.maxPrice),
+      of(this.selectedStores),
+      of(this.selectedRatings),
     ]).pipe(
-      map(([products, categories, selectedCategory, minPrice, maxPrice]) => {
-        return products.filter((p) => {
-          let matchCategory = true;
+      map(
+        ([
+          products,
+          categories,
+          selectedCategory,
+          minPrice,
+          maxPrice,
+          selectedStores,
+          selectedRatings,
+        ]) => {
+          return products.filter((p) => {
+            let matchCategory = true;
 
-          if (selectedCategory) {
-            const allowedCategoryIds = this.getCategoryAndDescendants(
-              selectedCategory,
-              categories
-            );
-
-            matchCategory = allowedCategoryIds.includes(p.categoryId);
-
-            if (!matchCategory) {
-              const selectedCategoryObj = this.findCategoryById(
+            if (selectedCategory) {
+              const allowedCategoryIds = this.getCategoryAndDescendants(
                 selectedCategory,
                 categories
               );
-              if (selectedCategoryObj) {
-                if (p.category?.title === selectedCategoryObj.title) {
-                  matchCategory = true;
-                } else {
-                  const descendantTitles = this.getCategoryAndDescendantTitles(
-                    selectedCategoryObj,
-                    categories
-                  );
-                  matchCategory = descendantTitles.includes(
-                    p.category?.title || ''
-                  );
+
+              matchCategory = allowedCategoryIds.includes(p.categoryId);
+
+              if (!matchCategory) {
+                const selectedCategoryObj = this.findCategoryById(
+                  selectedCategory,
+                  categories
+                );
+                if (selectedCategoryObj) {
+                  if (p.category?.title === selectedCategoryObj.title) {
+                    matchCategory = true;
+                  } else {
+                    const descendantTitles =
+                      this.getCategoryAndDescendantTitles(
+                        selectedCategoryObj,
+                        categories
+                      );
+                    matchCategory = descendantTitles.includes(
+                      p.category?.title || ''
+                    );
+                  }
                 }
               }
             }
-          }
 
-          const matchPriceMin = minPrice != null ? p.price >= minPrice : true;
-          const matchPriceMax = maxPrice != null ? p.price <= maxPrice : true;
+            const matchPriceMin = minPrice != null ? p.price >= minPrice : true;
+            const matchPriceMax = maxPrice != null ? p.price <= maxPrice : true;
 
-          return matchCategory && matchPriceMin && matchPriceMax;
-        });
-      })
+            const matchStore =
+              selectedStores.length === 0 || selectedStores.includes(p.storeId);
+
+            const productRating = this.calculateProductRating(p);
+            const matchRating =
+              selectedRatings.length === 0 ||
+              selectedRatings.some((rating) => productRating >= rating);
+
+            return (
+              matchCategory &&
+              matchPriceMin &&
+              matchPriceMax &&
+              matchStore &&
+              matchRating
+            );
+          });
+        }
+      )
     );
   }
 
@@ -195,6 +255,11 @@ export class ProductsComponent implements OnInit {
     const queryParams: any = {};
     if (this.minPrice != null) queryParams.minPrice = this.minPrice;
     if (this.maxPrice != null) queryParams.maxPrice = this.maxPrice;
+    if (this.selectedStores.length > 0)
+      queryParams.stores = this.selectedStores.join(',');
+    if (this.selectedRatings.length > 0)
+      queryParams.ratings = this.selectedRatings.join(',');
+
     this.router.navigate([], {
       relativeTo: this.route,
       queryParams,
@@ -206,6 +271,8 @@ export class ProductsComponent implements OnInit {
     this.selectedCategory = null;
     this.minPrice = null;
     this.maxPrice = null;
+    this.selectedStores = [];
+    this.selectedRatings = [];
     this.updateFilteredProducts();
     this.router.navigate(['/category']);
   }
@@ -214,5 +281,40 @@ export class ProductsComponent implements OnInit {
     this.selectedCategory = categoryId;
     this.updateRouteWithFilters();
     this.updateFilteredProducts();
+  }
+
+  onPriceChange() {
+    this.updateRouteWithFilters();
+    this.updateFilteredProducts();
+  }
+
+  onStoreChange(event: Event, storeId: string) {
+    const target = event.target as HTMLInputElement;
+    if (target.checked) {
+      this.selectedStores.push(storeId);
+    } else {
+      this.selectedStores = this.selectedStores.filter((id) => id !== storeId);
+    }
+    this.updateRouteWithFilters();
+    this.updateFilteredProducts();
+  }
+
+  onRatingChange(event: Event, rating: number) {
+    const target = event.target as HTMLInputElement;
+    if (target.checked) {
+      this.selectedRatings.push(rating);
+    } else {
+      this.selectedRatings = this.selectedRatings.filter((r) => r !== rating);
+    }
+    this.updateRouteWithFilters();
+    this.updateFilteredProducts();
+  }
+
+  isStoreSelected(storeId: string): boolean {
+    return this.selectedStores.includes(storeId);
+  }
+
+  isRatingSelected(rating: number): boolean {
+    return this.selectedRatings.includes(rating);
   }
 }

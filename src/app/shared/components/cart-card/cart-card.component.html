@@ -4,7 +4,19 @@
   >
     <div class="shrink-0">
       <div class="w-full h-[1.2px] bg-white mb-2 mt-2"></div>
-      <img [src]="productImage" alt="product" class="w-[85px] h-auto" />
+      <img
+        [src]="productImage"
+        [alt]="product.title"
+        class="w-[120px] h-[120px] object-cover rounded-lg"
+        (error)="onImageError($event)"
+      />
+      <!-- Fallback when image fails to load -->
+      <div
+        *ngIf="!productImage"
+        class="w-[120px] h-[120px] bg-gray-200 flex items-center justify-center text-gray-500 text-xs rounded-lg"
+      >
+        Нет фото
+      </div>
     </div>
 
     <div class="flex-grow">

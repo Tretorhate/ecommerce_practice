@@ -1,23 +1,35 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+import { Store } from '@ngrx/store';
 import { CartCardComponent } from '../cart-card/cart-card.component';
+import * as CartActions from '../../../store/actions/cart.actions';
+import { CartSidebarService } from '../../services/cart-sidebar.service';
 
 @Component({
   selector: 'app-cart-sidebar',
-  imports: [CartCardComponent, CommonModule],
+  imports: [CartCardComponent, CommonModule, RouterModule],
   templateUrl: './cart-sidebar.component.html',
 })
 export class CartSidebarComponent {
   @Input() products: any[] = [];
   @Output() cartUpdated = new EventEmitter<void>();
-  isOpen = false;
+
+  constructor(
+    private store: Store,
+    private cartSidebarService: CartSidebarService
+  ) {}
+
+  get isOpen$() {
+    return this.cartSidebarService.isOpen$;
+  }
 
   openSidebar() {
-    this.isOpen = true;
+    this.cartSidebarService.openSidebar();
   }
 
   closeSidebar() {
-    this.isOpen = false;
+    this.cartSidebarService.closeSidebar();
   }
 
   getTotalQuantity(): number {
@@ -35,19 +47,11 @@ export class CartSidebarComponent {
   }
 
   removeProduct(productId: string) {
-    this.products = this.products.filter((product) => product.id !== productId);
-
-    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-    const updatedCart = cart.filter((id: string) => id !== productId);
-    localStorage.setItem('cart', JSON.stringify(updatedCart));
-
+    this.store.dispatch(CartActions.removeFromCart({ itemId: productId }));
     this.cartUpdated.emit();
   }
 
-  updateTotal() {}
-
-  // Обработчик для кнопки "Заказать"
-  order() {
-    alert('Заказ оформлен!');
+  updateTotal() {
+    // This will be handled by the store automatically
   }
 }

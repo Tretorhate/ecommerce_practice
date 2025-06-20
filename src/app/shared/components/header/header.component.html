@@ -1,5 +1,8 @@
 <header class="bg-white pt-2">
-  <app-cart-sidebar #cartSidebar [products]="products" (cartUpdated)="loadCart()"></app-cart-sidebar>
+  <app-cart-sidebar
+    [products]="products"
+    (cartUpdated)="loadCart()"
+  ></app-cart-sidebar>
   <section class="flex px-6 py-4 justify-around items-center">
     <!-- Left: Logo -->
     <a href="/">
@@ -12,20 +15,33 @@
       <a href="#">Бизнесу</a>
       <a href="#">Ecommerce Гид</a>
     </nav>
-    
+
     <!-- Right: Cart -->
     <div class="flex items-center gap-1 text-black">
-      <span class="text-sm">0</span>
+      <span class="text-sm">{{
+        (cartTotal$ | async) || 0 | number : "1.0-0"
+      }}</span>
       <span class="text-sm">KZT</span>
       <span class="pi pi-angle-down text-xl cursor-pointer"></span>
       <a href="/profile">
-      <img src="svg/profile.svg" alt="Профиль" class="w-7 h-7">
-    </a>
+        <img src="svg/profile.svg" alt="Профиль" class="w-7 h-7" />
+      </a>
 
-      <button
-        (click)="cartSidebar.openSidebar()"
-        class="pi pi-shopping-cart text-xl cursor-pointer pl-4"
-      ></button>
+      <!-- Cart Icon with Count -->
+      <div class="relative pl-4">
+        <button
+          (click)="openCartSidebar()"
+          class="pi pi-shopping-cart text-xl cursor-pointer relative"
+        >
+          <!-- Cart Count Badge -->
+          <span
+            *ngIf="((cartItemCount$ | async) || 0) > 0"
+            class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium"
+          >
+            {{ (cartItemCount$ | async) || 0 }}
+          </span>
+        </button>
+      </div>
     </div>
   </section>
 
@@ -61,5 +77,3 @@
   </section>
   <app-category-menu></app-category-menu>
 </header>
-
-
