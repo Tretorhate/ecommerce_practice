@@ -27,6 +27,19 @@ export class CartCardComponent {
     return this.product.price * this.product.quantity;
   }
 
+  get productImage(): string {
+    const imageUrl = this.product.images?.[0] || '';
+    if (!imageUrl) return '';
+
+    // If the image URL is already absolute, return it as is
+    if (imageUrl.startsWith('http')) {
+      return imageUrl;
+    }
+
+    // If it's a relative path, add the base URL
+    return `https://practiceapi.mooo.com${imageUrl}`;
+  }
+
   increment() {
     this.product.quantity++;
     this.quantityChange.emit(this.product.quantity);
@@ -37,10 +50,14 @@ export class CartCardComponent {
       this.product.quantity--;
       this.quantityChange.emit(this.product.quantity);
     } else {
-      this.removeProduct.emit({
-        productId: this.product.id,
-        storeId: this.product.storeId,
-      });
+      this.removeProduct.emit(this.product.id);
+    }
+  }
+
+  onImageError(event: Event) {
+    const target = event.target as HTMLImageElement;
+    if (target) {
+      target.style.display = 'none';
     }
   }
 }

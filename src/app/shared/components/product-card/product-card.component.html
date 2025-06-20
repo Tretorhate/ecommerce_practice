@@ -1,5 +1,5 @@
 <a
-  class="relative h-full border border-gray-200 overflow-hidden flex flex-col cursor-pointer"
+  class="relative h-full border border-gray-300 overflow-hidden flex flex-col cursor-pointer"
   [routerLink]="['/product', product.id]"
 >
   <!-- Favorite heart -->
@@ -39,9 +39,10 @@
   </button>
 
   <img
-    [src]="product.images?.[0]"
+    [src]="productImage"
     [alt]="product.title"
-    class="w-full h-48 object-cover"
+    class="w-full h-48 sm:h-52 md:h-56 object-cover"
+    (error)="onImageError($event)"
   />
 
   <div class="p-4 flex flex-col flex-1">
@@ -87,6 +88,50 @@
         </span>
         <span class="text-[#a9a7a7] font-normal">×3</span>
       </div>
+    </div>
+
+    <!-- Add to Cart Button -->
+    <div *ngIf="showAddToCart" class="mt-4">
+      <ng-container *ngIf="cartItem$ | async as cartItem; else addToCartButton">
+        <!-- Quantity Controls -->
+        <div class="flex items-center justify-center gap-2">
+          <button
+            (click)="
+              decrementQuantity();
+              $event.stopPropagation();
+              $event.preventDefault()
+            "
+            class="w-8 h-8 text-sm font-bold border-2 border-gray-300 bg-white rounded cursor-pointer leading-none flex items-center justify-center hover:border-gray-400 transition-colors"
+          >
+            −
+          </button>
+          <span
+            class="text-lg font-medium text-gray-700 min-w-[2rem] text-center"
+          >
+            {{ cartItem.quantity }}
+          </span>
+          <button
+            (click)="
+              incrementQuantity();
+              $event.stopPropagation();
+              $event.preventDefault()
+            "
+            class="w-8 h-8 text-sm font-bold border-2 border-gray-300 bg-white rounded cursor-pointer leading-none flex items-center justify-center hover:border-gray-400 transition-colors"
+          >
+            +
+          </button>
+        </div>
+      </ng-container>
+      <ng-template #addToCartButton>
+        <button
+          (click)="
+            addToCart(); $event.stopPropagation(); $event.preventDefault()
+          "
+          class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded transition-colors duration-200"
+        >
+          Добавить в корзину
+        </button>
+      </ng-template>
     </div>
   </div>
 </a>

@@ -1,33 +1,42 @@
-import { Component, OnInit, signal } from '@angular/core';
-import { CartService } from '../../services/cart/cart.service';
-import { CartSidebarComponent } from '../cart-sidebar/cart-sidebar.component';
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs';
 import { CategoryMenuComponent } from '../category-menu/category-menu.component';
-import { AuthService } from '../../services/auth/auth.service';
+import { CartSidebarComponent } from '../cart-sidebar/cart-sidebar.component';
+import { OrderItem } from '../../models/order-item.model';
+import * as CartSelectors from '../../../store/selectors/cart.selectors';
+import { CartSidebarService } from '../../services/cart-sidebar.service';
 
 @Component({
   selector: 'app-header',
-  imports: [CategoryMenuComponent, CartSidebarComponent],
+  imports: [
+    CommonModule,
+    RouterModule,
+    CategoryMenuComponent,
+    CartSidebarComponent,
+  ],
   templateUrl: './header.component.html',
 })
 export class HeaderComponent implements OnInit {
+  cartItems$: Observable<OrderItem[]>;
+  cartItemCount$: Observable<number>;
+  cartTotal$: Observable<number>;
   products: any[] = [];
-  cart: { productId: string; storeId: string }[] = [];
-  
+
   constructor(
-    private cartService: CartService,
-    private authService: AuthService
-  ) { }
-  
-  onLogout() {
-    this.authService.logout();
+    private store: Store,
+    private cartSidebarService: CartSidebarService
+  ) {
+    this.cartItems$ = this.store.select(CartSelectors.selectCartItems);
+    this.cartItemCount$ = this.store.select(CartSelectors.selectCartItemCount);
+    this.cartTotal$ = this.store.select(CartSelectors.selectCartTotal);
   }
-  isLoggedIn = signal(false)
+
   ngOnInit() {
-    const isLoggedIn$ = this.authService.isLoggedIn();
-  isLoggedIn$.subscribe((value) => this.isLoggedIn.set(value));
-    this.cartService.cart$.subscribe((cart) => {
-      this.cart = cart;
-      this.loadProducts();
+    this.cartItems$.subscribe((cartItems: OrderItem[]) => {
+      this.loadProducts(cartItems);
     });
   }
 
@@ -36,29 +45,26 @@ export class HeaderComponent implements OnInit {
     this.cart = cart ? JSON.parse(cart) : [];
   }
 
-  loadProducts() {
-    if (this.cart.length > 0) {
-      const productIds = this.cart
-        .map((item) => item.productId)
-        .filter((id) => id);
-
-      this.cartService.getProductsByIds(productIds).subscribe((products) => {
-        this.cartService.getStores().subscribe((stores) => {
-          this.products = this.cart.map((cartItem) => {
-            const product = products.find((p) => p.id === cartItem.productId);
-            const store = stores.find((s) => s.id === cartItem.storeId);
-            return {
-              id: product.id,
-              title: product.title,
-              price: product.price,
-              image: product.images[0],
-              quantity: 1,
-              storeId: cartItem.storeId,
-              storeTitle: store ? store.title : cartItem.storeId,
-            };
-          });
-        });
-      });
+  loadProducts(cartItems: OrderItem[]) {
+    if (cartItems.length > 0) {
+      this.products = cartItems.map((orderItem) => ({
+        id: orderItem.product?.id || orderItem.id,
+        title: orderItem.product?.title || '',
+        price: orderItem.price,
+        images: orderItem.product?.images || [],
+        quantity: orderItem.quantity,
+      }));
+    } else {
+      this.products = [];
     }
+  }
+
+  loadCart() {
+    // This method is called by cart sidebar when cart is updated
+    // The store will automatically update the observables
+  }
+
+  openCartSidebar() {
+    this.cartSidebarService.openSidebar();
   }
 }

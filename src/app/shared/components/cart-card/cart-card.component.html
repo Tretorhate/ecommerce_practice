@@ -4,7 +4,19 @@
   >
     <div class="shrink-0">
       <div class="w-full h-[1.2px] bg-white mb-2 mt-2"></div>
-      <img [src]="product.image" alt="product" class="w-[85px] h-auto" />
+      <img
+        [src]="productImage"
+        [alt]="product.title"
+        class="w-[120px] h-[120px] object-cover rounded-lg"
+        (error)="onImageError($event)"
+      />
+      <!-- Fallback when image fails to load -->
+      <div
+        *ngIf="!productImage"
+        class="w-[120px] h-[120px] bg-gray-200 flex items-center justify-center text-gray-500 text-xs rounded-lg"
+      >
+        Нет фото
+      </div>
     </div>
 
     <div class="flex-grow">
@@ -26,7 +38,7 @@
         <div class="text-[#888] pl-3 border-l border-[#ddd]">В рассрочку</div>
 
         <div class="font-medium text-base text-[#333]">
-          {{ totalPrice | number: "1.0-0" }} ₸ㅤ
+          {{ totalPrice | number : "1.0-0" }} ₸ㅤ
         </div>
 
         <div
@@ -35,7 +47,7 @@
           <span
             class="bg-[#ffd300] px-2 py-0.5 mr-1 text-[#333] text-sm font-normal"
           >
-            {{ totalPrice / 3 | number: "1.0-0" }} ₸
+            {{ totalPrice / 3 | number : "1.0-0" }} ₸
           </span>
           <span class="text-[#a9a7a7] font-normal">×3</span>
         </div>
