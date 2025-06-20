@@ -21,7 +21,9 @@
       <a href="/profile">
       <img src="svg/profile.svg" alt="Профиль" class="w-7 h-7">
     </a>
-
+      @if (isLoggedIn()) {
+        <button class="mx-3 hover:text-blue-700" (click)="onLogout() ">Выйти</button>
+      }
       <button
         (click)="cartSidebar.openSidebar()"
         class="pi pi-shopping-cart text-xl cursor-pointer pl-4"

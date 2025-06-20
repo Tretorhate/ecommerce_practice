@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { CartService } from '../../services/cart/cart.service';
 import { CartSidebarComponent } from '../cart-sidebar/cart-sidebar.component';
 import { CategoryMenuComponent } from '../category-menu/category-menu.component';
+import { AuthService } from '../../services/auth/auth.service';
 
 @Component({
   selector: 'app-header',
@@ -10,12 +11,20 @@ import { CategoryMenuComponent } from '../category-menu/category-menu.component'
 })
 export class HeaderComponent implements OnInit {
   products: any[] = [];
-
   cart: { productId: string; storeId: string }[] = [];
-
-  constructor(private cartService: CartService) {}
-
+  
+  constructor(
+    private cartService: CartService,
+    private authService: AuthService
+  ) { }
+  
+  onLogout() {
+    this.authService.logout();
+  }
+  isLoggedIn = signal(false)
   ngOnInit() {
+    const isLoggedIn$ = this.authService.isLoggedIn();
+  isLoggedIn$.subscribe((value) => this.isLoggedIn.set(value));
     this.cartService.cart$.subscribe((cart) => {
       this.cart = cart;
       this.loadProducts();

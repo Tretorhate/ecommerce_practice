@@ -49,6 +49,7 @@ export const routes: Routes = [
       },
       {
         path: 'favorites',
+        canActivate: [authGuard],
         loadComponent: () =>
           import('./pages/favorites/favorites.component').then(
             (m) => m.FavoritesComponent
