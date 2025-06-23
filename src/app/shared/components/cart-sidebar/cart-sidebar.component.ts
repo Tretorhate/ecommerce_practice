@@ -54,4 +54,10 @@ export class CartSidebarComponent {
   updateTotal() {
     // This will be handled by the store automatically
   }
+
+  updateQuantity(itemId: string, quantity: number) {
+    this.store.dispatch(
+      CartActions.updateCartItemQuantity({ itemId, quantity })
+    );
+  }
 }

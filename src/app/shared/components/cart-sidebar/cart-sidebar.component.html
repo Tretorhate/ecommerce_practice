@@ -37,7 +37,7 @@
       <app-cart-card
         *ngFor="let product of products; let i = index"
         [product]="product"
-        (quantityChange)="updateTotal()"
+        (quantityChange)="updateQuantity(product.id, $event)"
         (removeProduct)="removeProduct(product.id)"
       >
       </app-cart-card>

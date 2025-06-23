@@ -11,10 +11,10 @@ export class CartCardComponent {
     id: string;
     title: string;
     price: number;
-    image: string;
-    quantity: 1;
-    storeId: string;
-    storeTitle: string;
+    images: string[];
+    quantity: number;
+    storeId?: string;
+    storeTitle?: string;
   };
   @Input() storeTitle!: string;
   @Output() quantityChange = new EventEmitter<number>();
@@ -28,16 +28,7 @@ export class CartCardComponent {
   }
 
   get productImage(): string {
-    const imageUrl = this.product.images?.[0] || '';
-    if (!imageUrl) return '';
-
-    // If the image URL is already absolute, return it as is
-    if (imageUrl.startsWith('http')) {
-      return imageUrl;
-    }
-
-    // If it's a relative path, add the base URL
-    return `https://practiceapi.mooo.com${imageUrl}`;
+    return this.product.images?.[0] || '';
   }
 
   increment() {
@@ -50,7 +41,10 @@ export class CartCardComponent {
       this.product.quantity--;
       this.quantityChange.emit(this.product.quantity);
     } else {
-      this.removeProduct.emit(this.product.id);
+      this.removeProduct.emit({
+        productId: this.product.id,
+        storeId: this.product.storeId || '',
+      });
     }
   }
 

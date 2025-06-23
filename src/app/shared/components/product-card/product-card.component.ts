@@ -7,8 +7,8 @@ import { ProductItem } from '../../models/product-item.model';
 import { OrderItem } from '../../models/order-item.model';
 import * as CartActions from '../../../store/actions/cart.actions';
 import * as CartSelectors from '../../../store/selectors/cart.selectors';
-import { CartService } from '../../services/cart.service';
 import { CartSidebarService } from '../../services/cart-sidebar.service';
+import { CartService } from '../../services/cart/cart.service';
 
 @Component({
   selector: 'app-product-card',
@@ -36,16 +36,7 @@ export class ProductCardComponent implements OnInit {
   }
 
   get productImage(): string {
-    const imageUrl = this.product.images?.[0] || '';
-    if (!imageUrl) return '';
-
-    // If the image URL is already absolute, return it as is
-    if (imageUrl.startsWith('http')) {
-      return imageUrl;
-    }
-
-    // If it's a relative path, add the base URL
-    return `https://practiceapi.mooo.com${imageUrl}`;
+    return this.product.images?.[0] || '';
   }
 
   get rating(): number {

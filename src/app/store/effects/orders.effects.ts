@@ -4,10 +4,11 @@ import { catchError, map, mergeMap, tap } from 'rxjs/operators';
 import { of } from 'rxjs';
 import * as OrdersActions from '../actions/orders.actions';
 import * as CartActions from '../actions/cart.actions';
-import { OrderService } from '../../shared/services/order.service';
+
 import { ProfileService } from '../../shared/services/profile/profile.service';
 import { Router } from '@angular/router';
 import { CreateOrderRequest } from '../../shared/models/order.model';
+import { OrderService } from '../../shared/services/cart/order.service';
 
 @Injectable()
 export class OrdersEffects {

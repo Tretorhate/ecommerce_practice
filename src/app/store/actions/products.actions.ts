@@ -5,7 +5,7 @@ import { Error } from '../../shared/models/error.model';
 // Load Products
 export const loadProducts = createAction(
   '[Products] Load Products',
-  props<{ category?: string }>()
+  props<{ category?: string; searchTerm?: string }>()
 );
 
 export const loadProductsSuccess = createAction(

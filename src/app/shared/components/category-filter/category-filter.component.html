@@ -34,7 +34,7 @@
           [routerLink]="['/c', cat.id]"
           class="hover:underline text-left flex-1"
           [ngClass]="{
-            'text-blue-600 font-semibold': activeCategoryId === cat.id
+            'text-blue-600 font-semibold': isCategoryActive(cat.id)
           }"
         >
           {{ cat.title }}
@@ -72,7 +72,7 @@
               [routerLink]="['/c', sub.id]"
               class="hover:underline text-left flex-1"
               [ngClass]="{
-                'text-blue-600 font-semibold': activeCategoryId === sub.id
+                'text-blue-600 font-semibold': isCategoryActive(sub.id)
               }"
             >
               {{ sub.title }}
@@ -88,7 +88,7 @@
                 [routerLink]="['/c', sub2.id]"
                 class="hover:underline text-left w-full"
                 [ngClass]="{
-                  'text-blue-600 font-semibold': activeCategoryId === sub2.id
+                  'text-blue-600 font-semibold': isCategoryActive(sub2.id)
                 }"
               >
                 {{ sub2.title }}

@@ -27,6 +27,12 @@
         <img src="svg/profile.svg" alt="Профиль" class="w-7 h-7" />
       </a>
 
+      @if (isLoggedIn()) {
+      <button class="mx-3 hover:text-blue-700" (click)="onLogout()">
+        Выйти
+      </button>
+      }
+
       <!-- Cart Icon with Count -->
       <div class="relative pl-4">
         <button
@@ -54,19 +60,27 @@
     >
       <button
         class="px-4 text-[#0089D0] font-medium border-r border-gray-300 bg-[#F5F5F5]"
+        tabindex="-1"
+        type="button"
       >
         Магазин
       </button>
-      <input
-        type="text"
-        placeholder="Поиск товара"
-        class="flex-1 px-4 py-2 focus:outline-none text-sm bg-[#FBFBFB] text-gray-700"
-      />
-      <button
-        class="bg-blue-600 text-white px-4 flex items-center justify-center"
-      >
-        <i class="pi pi-search text-white"></i>
-      </button>
+      <form class="flex flex-1" (ngSubmit)="onSearch()" autocomplete="off">
+        <input
+          type="text"
+          placeholder="Поиск товара"
+          class="flex-1 px-4 py-2 focus:outline-none text-sm bg-[#FBFBFB] text-gray-700"
+          [(ngModel)]="searchTerm"
+          name="searchTerm"
+          (keyup.enter)="onSearch()"
+        />
+        <button
+          class="bg-blue-600 text-white px-4 flex items-center justify-center"
+          type="submit"
+        >
+          <i class="pi pi-search text-white"></i>
+        </button>
+      </form>
     </div>
 
     <!-- Right: City Info -->

@@ -5,7 +5,7 @@ import { Store } from '@ngrx/store';
 import { Observable, take } from 'rxjs';
 import { OrderItem } from '../../shared/models/order-item.model';
 import { Order } from '../../shared/models/order.model';
-import { CartService } from '../../shared/services/cart.service';
+import { CartService } from '../../shared/services/cart/cart.service';
 import { OrderUtilsService } from '../../shared/services/order-utils.service';
 import * as OrdersActions from '../../store/actions/orders.actions';
 import * as CartSelectors from '../../store/selectors/cart.selectors';

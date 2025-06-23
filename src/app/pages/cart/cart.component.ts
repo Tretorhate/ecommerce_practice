@@ -37,8 +37,10 @@ export class CartComponent implements OnInit {
     );
   }
 
-  removeItem(itemId: string) {
-    this.store.dispatch(CartActions.removeFromCart({ itemId }));
+  removeItem(params: { productId: string; storeId: string }) {
+    this.store.dispatch(
+      CartActions.removeFromCart({ itemId: params.productId })
+    );
   }
 
   clearCart() {

@@ -4,8 +4,8 @@ import { catchError, map, mergeMap, tap, withLatestFrom } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { Store } from '@ngrx/store';
 import * as CartActions from '../actions/cart.actions';
-import { CartService } from '../../shared/services/cart.service';
 import * as CartSelectors from '../selectors/cart.selectors';
+import { CartService } from '../../shared/services/cart/cart.service';
 
 @Injectable()
 export class CartEffects {
@@ -40,21 +40,23 @@ export class CartEffects {
       withLatestFrom(this.store.select(CartSelectors.selectCartItems)),
       mergeMap(([{ item }, currentItems]) => {
         const existingItem = currentItems.find(
-          (cartItem) => cartItem.id === item.id
+          (cartItem) => cartItem.productId === item.productId
         );
 
         if (existingItem) {
           // If item already exists, increment quantity
           const newQuantity = existingItem.quantity + item.quantity;
-          return this.cartService.updateItemQuantity(item.id, newQuantity).pipe(
-            mergeMap((updatedItem) => [
-              CartActions.updateCartItemQuantitySuccess({
-                itemId: item.id,
-                quantity: newQuantity,
-              }),
-            ]),
-            catchError((error) => of(CartActions.addToCartFailure({ error })))
-          );
+          return this.cartService
+            .updateItemQuantity(existingItem.id, newQuantity)
+            .pipe(
+              mergeMap((updatedItem) => [
+                CartActions.updateCartItemQuantitySuccess({
+                  itemId: existingItem.id,
+                  quantity: newQuantity,
+                }),
+              ]),
+              catchError((error) => of(CartActions.addToCartFailure({ error })))
+            );
         } else {
           // If item doesn't exist, add it
           return this.cartService.addItem(item).pipe(
@@ -105,7 +107,7 @@ export class CartEffects {
           );
         }
 
-        const newQuantity = currentItem.quantity + quantity;
+        const newQuantity = quantity;
         if (newQuantity < 1) {
           // If quantity would be less than 1, remove the item
           return this.cartService.removeItem(itemId).pipe(
