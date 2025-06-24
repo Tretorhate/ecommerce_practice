@@ -3,28 +3,46 @@ import { CartService } from '../../services/cart/cart.service';
 import { CartSidebarComponent } from '../cart-sidebar/cart-sidebar.component';
 import { CategoryMenuComponent } from '../category-menu/category-menu.component';
 import { AuthService } from '../../services/auth/auth.service';
+import { FormsModule } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-header',
-  imports: [CategoryMenuComponent, CartSidebarComponent],
+  imports: [
+    CategoryMenuComponent,
+    CartSidebarComponent,
+    FormsModule,
+    RouterLink,
+  ],
   templateUrl: './header.component.html',
 })
 export class HeaderComponent implements OnInit {
   products: any[] = [];
   cart: { productId: string; storeId: string }[] = [];
-  
+  searchQuery: string = '';
+
   constructor(
     private cartService: CartService,
-    private authService: AuthService
-  ) { }
-  
+    private authService: AuthService,
+    private router: Router,
+  ) {}
+
+  onSearch() {
+    if (this.searchQuery.length) {
+      this.router.navigate([`/products`], {
+        queryParams: { searchTerm: this.searchQuery },
+      });
+    } else {
+      this.router.navigate([`/products`]);
+    }
+  }
   onLogout() {
     this.authService.logout();
   }
-  isLoggedIn = signal(false)
+  isLoggedIn = signal(false);
   ngOnInit() {
     const isLoggedIn$ = this.authService.isLoggedIn();
-  isLoggedIn$.subscribe((value) => this.isLoggedIn.set(value));
+    isLoggedIn$.subscribe((value) => this.isLoggedIn.set(value));
     this.cartService.cart$.subscribe((cart) => {
       this.cart = cart;
       this.loadProducts();

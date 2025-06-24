@@ -14,17 +14,17 @@ export class ProductsEffects {
   loadProducts$ = createEffect(() =>
     this.actions$.pipe(
       ofType(ProductsActions.loadProducts),
-      mergeMap(({ category }) =>
-        this.productService.getProducts(category).pipe(
+      mergeMap(({ category, searchTerm }) =>
+        this.productService.getProducts({ category, searchTerm }).pipe(
           map((products: ProductItem[]) =>
-            ProductsActions.loadProductsSuccess({ products })
+            ProductsActions.loadProductsSuccess({ products }),
           ),
           catchError((error) =>
-            of(ProductsActions.loadProductsFailure({ error }))
-          )
-        )
-      )
-    )
+            of(ProductsActions.loadProductsFailure({ error })),
+          ),
+        ),
+      ),
+    ),
   );
 
   loadProduct$ = createEffect(() =>
@@ -33,13 +33,13 @@ export class ProductsEffects {
       mergeMap(({ id }) =>
         this.productService.getProduct(id).pipe(
           map((product: ProductItem) =>
-            ProductsActions.loadProductSuccess({ product })
+            ProductsActions.loadProductSuccess({ product }),
           ),
           catchError((error) =>
-            of(ProductsActions.loadProductFailure({ error }))
-          )
-        )
-      )
-    )
+            of(ProductsActions.loadProductFailure({ error })),
+          ),
+        ),
+      ),
+    ),
   );
 }

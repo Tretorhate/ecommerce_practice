@@ -37,7 +37,7 @@ export class ProductsComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private store: Store,
-    private categoryService: CategoryService
+    private categoryService: CategoryService,
   ) {
     this.products$ = this.store.select(selectProducts);
     this.categories$ = this.categoryService.getCategories();
@@ -55,7 +55,11 @@ export class ProductsComponent implements OnInit {
       this.updateFiltersFromRoute();
       this.updateFilteredProducts();
     });
-    this.route.queryParamMap.subscribe(() => {
+    this.route.queryParamMap.subscribe((params) => {
+      const searchQuery = params.get('searchTerm');
+      this.store.dispatch(
+        loadProducts({ searchTerm: searchQuery || undefined }),
+      );
       this.updateFiltersFromRoute();
       this.updateFilteredProducts();
     });
@@ -73,13 +77,13 @@ export class ProductsComponent implements OnInit {
   // Helper method to get all descendant category IDs (including the category itself)
   private getCategoryAndDescendants(
     categoryId: string,
-    categories: Category[]
+    categories: Category[],
   ): string[] {
     const result: string[] = [categoryId];
 
     const findCategory = (
       cats: Category[],
-      targetId: string
+      targetId: string,
     ): Category | null => {
       for (const cat of cats) {
         if (cat.id === targetId) {
@@ -118,7 +122,7 @@ export class ProductsComponent implements OnInit {
           if (selectedCategory) {
             const allowedCategoryIds = this.getCategoryAndDescendants(
               selectedCategory,
-              categories
+              categories,
             );
 
             matchCategory = allowedCategoryIds.includes(p.categoryId);
@@ -126,7 +130,7 @@ export class ProductsComponent implements OnInit {
             if (!matchCategory) {
               const selectedCategoryObj = this.findCategoryById(
                 selectedCategory,
-                categories
+                categories,
               );
               if (selectedCategoryObj) {
                 if (p.category?.title === selectedCategoryObj.title) {
@@ -134,10 +138,10 @@ export class ProductsComponent implements OnInit {
                 } else {
                   const descendantTitles = this.getCategoryAndDescendantTitles(
                     selectedCategoryObj,
-                    categories
+                    categories,
                   );
                   matchCategory = descendantTitles.includes(
-                    p.category?.title || ''
+                    p.category?.title || '',
                   );
                 }
               }
@@ -149,13 +153,13 @@ export class ProductsComponent implements OnInit {
 
           return matchCategory && matchPriceMin && matchPriceMax;
         });
-      })
+      }),
     );
   }
 
   private findCategoryById(
     categoryId: string,
-    categories: Category[]
+    categories: Category[],
   ): Category | null {
     for (const cat of categories) {
       if (cat.id === categoryId) {
@@ -171,7 +175,7 @@ export class ProductsComponent implements OnInit {
 
   private getCategoryAndDescendantTitles(
     category: Category,
-    allCategories: Category[]
+    allCategories: Category[],
   ): string[] {
     const result: string[] = [category.title];
 
@@ -179,7 +183,7 @@ export class ProductsComponent implements OnInit {
       for (const child of category.children) {
         result.push(child.title);
         result.push(
-          ...this.getCategoryAndDescendantTitles(child, allCategories)
+          ...this.getCategoryAndDescendantTitles(child, allCategories),
         );
       }
     }

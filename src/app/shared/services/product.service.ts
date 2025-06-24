@@ -9,11 +9,21 @@ import { ProductItem } from '../models/product-item.model';
 export class ProductService {
   private readonly http = inject(HttpClient);
 
-  getProducts(category?: string): Observable<ProductItem[]> {
+  getProducts({
+    category,
+    searchTerm,
+  }: {
+    category?: string;
+    searchTerm?: string;
+  }): Observable<ProductItem[]> {
     let url = '/products';
-    if (category) {
-      url += `?category=${category}`;
+    // if (category) {
+    //   url += `?category=${category}`;
+    // }
+    if (searchTerm) {
+      url += `?searchTerm=${searchTerm}`;
     }
+    console.log(url);
     return this.http.get<ProductItem[]>(url);
   }
 
