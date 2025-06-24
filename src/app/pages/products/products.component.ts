@@ -7,11 +7,13 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ProductItem } from '../../shared/models/product-item.model';
 import { Category } from '../../shared/models/category.model';
 import { Store } from '@ngrx/store';
-import { Observable, combineLatest, of } from 'rxjs';
-import { map, startWith, filter } from 'rxjs/operators';
+import { Observable, combineLatest, BehaviorSubject } from 'rxjs';
+import { map, startWith, filter, distinctUntilChanged } from 'rxjs/operators';
 import { selectProducts } from '../../store/selectors/products.selectors';
 import { loadProducts } from '../../store/actions/products.actions';
 import { CategoryService } from '../../shared/services/category.service';
+import { StoreService, StoreFilter } from '../../shared/services/store.service';
+import { ProductFilterService } from '../../shared/services/product-filter.service';
 
 @Component({
   selector: 'app-products',
@@ -24,25 +26,102 @@ import { CategoryService } from '../../shared/services/category.service';
   templateUrl: './products.component.html',
 })
 export class ProductsComponent implements OnInit {
-  selectedCategory: string | null = null;
+  // Filter state as BehaviorSubjects for reactivity
+  private selectedCategorySubject = new BehaviorSubject<string | null>(null);
+  private minPriceSubject = new BehaviorSubject<number | null>(null);
+  private maxPriceSubject = new BehaviorSubject<number | null>(null);
+  private selectedStoresSubject = new BehaviorSubject<string[]>([]);
+  private selectedRatingsSubject = new BehaviorSubject<number[]>([]);
+  private searchTermSubject = new BehaviorSubject<string | null>(null);
 
-  minPrice: number | null = null;
-  maxPrice: number | null = null;
+  // Public observables for template
+  selectedCategory$ = this.selectedCategorySubject.asObservable();
+  minPrice$ = this.minPriceSubject.asObservable();
+  maxPrice$ = this.maxPriceSubject.asObservable();
+  selectedStores$ = this.selectedStoresSubject.asObservable();
+  selectedRatings$ = this.selectedRatingsSubject.asObservable();
+  searchTerm$ = this.searchTermSubject.asObservable();
+
+  // Getters for current values
+  get selectedCategory(): string | null {
+    return this.selectedCategorySubject.value;
+  }
+
+  get minPrice(): number | null {
+    return this.minPriceSubject.value;
+  }
+
+  get maxPrice(): number | null {
+    return this.maxPriceSubject.value;
+  }
+
+  get selectedStores(): string[] {
+    return this.selectedStoresSubject.value;
+  }
+
+  get selectedRatings(): number[] {
+    return this.selectedRatingsSubject.value;
+  }
 
   products$: Observable<ProductItem[]>;
   categories$: Observable<Category[]>;
+  stores$: Observable<StoreFilter[]>;
   filteredProducts$: Observable<ProductItem[]>;
+
+  // Available rating options
+  ratingOptions = [
+    { value: 5, label: '5 звезд' },
+    { value: 4, label: '4+ звезды' },
+    { value: 3, label: '3+ звезды' },
+    { value: 2, label: '2+ звезды' },
+    { value: 1, label: '1+ звезда' },
+  ];
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private store: Store,
-    private categoryService: CategoryService
+    private categoryService: CategoryService,
+    private storeService: StoreService,
+    private productFilterService: ProductFilterService
   ) {
     this.products$ = this.store.select(selectProducts);
     this.categories$ = this.categoryService.getCategories();
+    this.stores$ = this.storeService.getStores();
 
-    this.filteredProducts$ = of([]);
+    // Create reactive filtered products observable
+    this.filteredProducts$ = combineLatest([
+      this.products$,
+      this.categories$,
+      this.selectedCategory$,
+      this.minPrice$,
+      this.maxPrice$,
+      this.selectedStores$,
+      this.selectedRatings$,
+      this.searchTerm$,
+    ]).pipe(
+      map(
+        ([
+          products,
+          categories,
+          selectedCategory,
+          minP,
+          maxP,
+          stores,
+          ratings,
+          term,
+        ]) =>
+          this.productFilterService.filter(products, {
+            categoryId: selectedCategory,
+            minPrice: minP,
+            maxPrice: maxP,
+            storeIds: stores,
+            ratingThresholds: ratings,
+            searchTerm: term,
+            categories,
+          })
+      )
+    );
   }
 
   ngOnInit(): void {
@@ -51,13 +130,11 @@ export class ProductsComponent implements OnInit {
     // Listen to route param and query param changes
     this.route.paramMap.subscribe((params) => {
       const category = params.get('category');
-      this.selectedCategory = category;
+      this.selectedCategorySubject.next(category);
       this.updateFiltersFromRoute();
-      this.updateFilteredProducts();
     });
     this.route.queryParamMap.subscribe(() => {
       this.updateFiltersFromRoute();
-      this.updateFilteredProducts();
     });
   }
 
@@ -66,125 +143,17 @@ export class ProductsComponent implements OnInit {
     const queryParams = this.route.snapshot.queryParamMap;
     const minPrice = queryParams.get('minPrice');
     const maxPrice = queryParams.get('maxPrice');
-    this.minPrice = minPrice ? +minPrice : null;
-    this.maxPrice = maxPrice ? +maxPrice : null;
-  }
+    const stores = queryParams.get('stores');
+    const ratings = queryParams.get('ratings');
+    const searchTerm = queryParams.get('searchTerm');
 
-  // Helper method to get all descendant category IDs (including the category itself)
-  private getCategoryAndDescendants(
-    categoryId: string,
-    categories: Category[]
-  ): string[] {
-    const result: string[] = [categoryId];
-
-    const findCategory = (
-      cats: Category[],
-      targetId: string
-    ): Category | null => {
-      for (const cat of cats) {
-        if (cat.id === targetId) {
-          return cat;
-        }
-        if (cat.children) {
-          const found = findCategory(cat.children, targetId);
-          if (found) return found;
-        }
-      }
-      return null;
-    };
-
-    const category = findCategory(categories, categoryId);
-    if (category && category.children) {
-      for (const child of category.children) {
-        result.push(...this.getCategoryAndDescendants(child.id, categories));
-      }
-    }
-
-    return result;
-  }
-
-  updateFilteredProducts() {
-    this.filteredProducts$ = combineLatest([
-      this.products$,
-      this.categories$,
-      of(this.selectedCategory),
-      of(this.minPrice),
-      of(this.maxPrice),
-    ]).pipe(
-      map(([products, categories, selectedCategory, minPrice, maxPrice]) => {
-        return products.filter((p) => {
-          let matchCategory = true;
-
-          if (selectedCategory) {
-            const allowedCategoryIds = this.getCategoryAndDescendants(
-              selectedCategory,
-              categories
-            );
-
-            matchCategory = allowedCategoryIds.includes(p.categoryId);
-
-            if (!matchCategory) {
-              const selectedCategoryObj = this.findCategoryById(
-                selectedCategory,
-                categories
-              );
-              if (selectedCategoryObj) {
-                if (p.category?.title === selectedCategoryObj.title) {
-                  matchCategory = true;
-                } else {
-                  const descendantTitles = this.getCategoryAndDescendantTitles(
-                    selectedCategoryObj,
-                    categories
-                  );
-                  matchCategory = descendantTitles.includes(
-                    p.category?.title || ''
-                  );
-                }
-              }
-            }
-          }
-
-          const matchPriceMin = minPrice != null ? p.price >= minPrice : true;
-          const matchPriceMax = maxPrice != null ? p.price <= maxPrice : true;
-
-          return matchCategory && matchPriceMin && matchPriceMax;
-        });
-      })
+    this.minPriceSubject.next(minPrice ? +minPrice : null);
+    this.maxPriceSubject.next(maxPrice ? +maxPrice : null);
+    this.selectedStoresSubject.next(stores ? stores.split(',') : []);
+    this.selectedRatingsSubject.next(
+      ratings ? ratings.split(',').map((r) => +r) : []
     );
-  }
-
-  private findCategoryById(
-    categoryId: string,
-    categories: Category[]
-  ): Category | null {
-    for (const cat of categories) {
-      if (cat.id === categoryId) {
-        return cat;
-      }
-      if (cat.children) {
-        const found = this.findCategoryById(categoryId, cat.children);
-        if (found) return found;
-      }
-    }
-    return null;
-  }
-
-  private getCategoryAndDescendantTitles(
-    category: Category,
-    allCategories: Category[]
-  ): string[] {
-    const result: string[] = [category.title];
-
-    if (category.children) {
-      for (const child of category.children) {
-        result.push(child.title);
-        result.push(
-          ...this.getCategoryAndDescendantTitles(child, allCategories)
-        );
-      }
-    }
-
-    return result;
+    this.searchTermSubject.next(searchTerm);
   }
 
   trackByProductId(index: number, product: ProductItem) {
@@ -195,6 +164,11 @@ export class ProductsComponent implements OnInit {
     const queryParams: any = {};
     if (this.minPrice != null) queryParams.minPrice = this.minPrice;
     if (this.maxPrice != null) queryParams.maxPrice = this.maxPrice;
+    if (this.selectedStores.length > 0)
+      queryParams.stores = this.selectedStores.join(',');
+    if (this.selectedRatings.length > 0)
+      queryParams.ratings = this.selectedRatings.join(',');
+
     this.router.navigate([], {
       relativeTo: this.route,
       queryParams,
@@ -203,16 +177,70 @@ export class ProductsComponent implements OnInit {
   }
 
   resetFilters() {
-    this.selectedCategory = null;
-    this.minPrice = null;
-    this.maxPrice = null;
-    this.updateFilteredProducts();
+    this.selectedCategorySubject.next(null);
+    this.minPriceSubject.next(null);
+    this.maxPriceSubject.next(null);
+    this.selectedStoresSubject.next([]);
+    this.selectedRatingsSubject.next([]);
     this.router.navigate(['/category']);
   }
 
   onCategorySelected(categoryId: string) {
-    this.selectedCategory = categoryId;
+    this.selectedCategorySubject.next(categoryId);
     this.updateRouteWithFilters();
-    this.updateFilteredProducts();
+  }
+
+  onPriceChange() {
+    this.updateRouteWithFilters();
+  }
+
+  onMinPriceChange(event: Event) {
+    const target = event.target as HTMLInputElement;
+    const value = target.value ? +target.value : null;
+    this.minPriceSubject.next(value);
+    this.updateRouteWithFilters();
+  }
+
+  onMaxPriceChange(event: Event) {
+    const target = event.target as HTMLInputElement;
+    const value = target.value ? +target.value : null;
+    this.maxPriceSubject.next(value);
+    this.updateRouteWithFilters();
+  }
+
+  onStoreChange(event: Event, storeId: string) {
+    const target = event.target as HTMLInputElement;
+    const currentStores = this.selectedStoresSubject.value;
+
+    if (target.checked) {
+      this.selectedStoresSubject.next([...currentStores, storeId]);
+    } else {
+      this.selectedStoresSubject.next(
+        currentStores.filter((id) => id !== storeId)
+      );
+    }
+    this.updateRouteWithFilters();
+  }
+
+  onRatingChange(event: Event, rating: number) {
+    const target = event.target as HTMLInputElement;
+    const currentRatings = this.selectedRatingsSubject.value;
+
+    if (target.checked) {
+      this.selectedRatingsSubject.next([...currentRatings, rating]);
+    } else {
+      this.selectedRatingsSubject.next(
+        currentRatings.filter((r) => r !== rating)
+      );
+    }
+    this.updateRouteWithFilters();
+  }
+
+  isStoreSelected(storeId: string): boolean {
+    return this.selectedStores.includes(storeId);
+  }
+
+  isRatingSelected(rating: number): boolean {
+    return this.selectedRatings.includes(rating);
   }
 }

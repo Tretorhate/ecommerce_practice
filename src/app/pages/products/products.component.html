@@ -14,17 +14,55 @@
         <div class="flex items-center gap-2">
           <input
             type="number"
-            [(ngModel)]="minPrice"
+            [value]="minPrice"
+            (input)="onMinPriceChange($event)"
             placeholder="От"
             class="w-20 p-1 border rounded text-xs"
           />
           <span>-</span>
           <input
             type="number"
-            [(ngModel)]="maxPrice"
+            [value]="maxPrice"
+            (input)="onMaxPriceChange($event)"
             placeholder="До"
             class="w-20 p-1 border rounded text-xs"
           />
+        </div>
+      </div>
+
+      <!-- Store filter -->
+      <div>
+        <h2 class="font-semibold mb-2">Магазин</h2>
+        <div class="space-y-2 max-h-40 overflow-y-auto">
+          @for (store of stores$ | async; track store.id) {
+          <label class="flex items-center space-x-2 cursor-pointer">
+            <input
+              type="checkbox"
+              [checked]="isStoreSelected(store.id)"
+              (change)="onStoreChange($event, store.id)"
+              class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            />
+            <span class="text-sm text-gray-700">{{ store.title }}</span>
+          </label>
+          }
+        </div>
+      </div>
+
+      <!-- Rating filter -->
+      <div>
+        <h2 class="font-semibold mb-2">Рейтинг</h2>
+        <div class="space-y-2">
+          @for (rating of ratingOptions; track rating.value) {
+          <label class="flex items-center space-x-2 cursor-pointer">
+            <input
+              type="checkbox"
+              [checked]="isRatingSelected(rating.value)"
+              (change)="onRatingChange($event, rating.value)"
+              class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            />
+            <span class="text-sm text-gray-700">{{ rating.label }}</span>
+          </label>
+          }
         </div>
       </div>
     </aside>
@@ -34,7 +72,7 @@
       @if (filteredProducts$ | async; as $filteredProducts) { @if
       ($filteredProducts.length > 0) {
       <div
-        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-0 auto-rows-fr flex-1"
+        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-0 auto-rows-fr"
       >
         @for (product of $filteredProducts; track product.id) {
         <app-product-card [product]="product"></app-product-card>

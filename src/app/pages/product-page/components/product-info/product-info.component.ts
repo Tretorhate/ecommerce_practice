@@ -1,86 +1,94 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { ProductReviewService } from '../../../../shared/services/product-review/product-review.service';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
-import { CartService } from '../../../../shared/services/cart/cart.service';
-import { FavoritesService } from '../../../../shared/services/favorites/favorites.service';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
+import { Store } from '@ngrx/store';
+import { ProductItem } from '../../../../shared/models/product-item.model';
+import { FavoritesService } from '../../../../shared/services/favorites/favorites.service';
+import * as CartActions from '../../../../store/actions/cart.actions';
+import { CartSidebarService } from '../../../../shared/services/cart-sidebar.service';
+import { ProductService } from '../../../../shared/services/product.service';
+import { CartService } from '../../../../shared/services/cart/cart.service';
+
 @Component({
   selector: 'app-product-info',
   templateUrl: './product-info.component.html',
   imports: [CommonModule, FormsModule],
 })
 export class ProductInfoComponent implements OnInit {
-  product: {
-    id: string;
-    title: string;
-    price: number;
-    installmentPrice: number;
-    installmentCount: number;
-    image: string;
-    thumbnailImages: string[];
-  } = {
-    id: '',
-    title: '',
-    price: 0,
-    installmentPrice: 0,
-    installmentCount: 3,
-    image: '',
-    thumbnailImages: [],
-  };
+  product!: ProductItem;
+  isFavorite = false;
+  selectedMainImage: string = '';
+
+  get installmentPrice(): number {
+    return Math.round(this.product.price / 3);
+  }
+
+  get installmentCount(): number {
+    return 3;
+  }
 
   constructor(
     private productReviewService: ProductReviewService,
     private route: ActivatedRoute,
+    private store: Store,
+    private favoritesService: FavoritesService,
     private cartService: CartService,
+    private cartSidebarService: CartSidebarService,
+    private productService: ProductService
   ) {}
 
-  private favoriteService = inject(FavoritesService);
   ngOnInit() {
-    const productId = this.route.snapshot.paramMap.get('id') || '';
-    if (productId) {
-      this.productReviewService
-        .fetchProductById(productId)
-        .subscribe((data) => {
-          this.product.id = data.id;
-          this.product.title = data.title;
-          this.product.price = data.price;
-          this.product.installmentPrice = Math.round(data.price / 3);
-          this.product.image = data.images[0];
-          this.product.thumbnailImages = data.images;
+    this.route.paramMap.subscribe((params) => {
+      const productId = params.get('id');
+      if (productId) {
+        this.productService.getProduct(productId).subscribe({
+          next: (product) => {
+            this.product = product;
+            // Set the first image as the main image
+            this.selectedMainImage = this.product?.images?.[0] || '';
+          },
+          error: (error) => {
+            console.error('Error loading product:', error);
+          },
         });
-    }
-
-    this.getStores();
-  }
-
-  changeMainImage(imageUrl: string) {
-    this.product.image = imageUrl;
-  }
-  stores: { id: string; title: string }[] = [];
-  selectedStoreId: string | null = null;
-  getStores() {
-    this.cartService.getStores().subscribe((stores) => {
-      this.stores = stores;
-      if (stores.length > 0) {
-        this.selectedStoreId = stores[0].id;
       }
     });
   }
-  selectStore(storeId: string) {
-    this.selectedStoreId = storeId;
+
+  changeMainImage(imageUrl: string) {
+    this.selectedMainImage = imageUrl;
+  }
+
+  onImageError(event: Event) {
+    const target = event.target as HTMLImageElement;
+    console.error('Image failed to load:', target.src);
+    if (target) {
+      target.style.display = 'none';
+    }
+  }
+
+  toggleFavorite() {
+    this.favoritesService.toggleFavorite(this.product.id).subscribe(() => {
+      this.isFavorite = !this.isFavorite;
+    });
   }
 
   addToCart(productId: string) {
-    if (this.selectedStoreId) {
-      this.cartService.addToCart(productId, this.selectedStoreId);
-    } else {
-      alert('Пожалуйста, выберите магазин.');
-    }
+    const cartItem = this.cartService.createCartItemFromProduct(
+      this.product,
+      1
+    );
+    this.store.dispatch(CartActions.addToCart({ item: cartItem }));
+    this.cartSidebarService.openSidebar();
   }
-  isFavorite = false;
 
-  toggleFavorite() {
-    this.favoriteService.toggleFavorite(this.product.id);
+  get mainImage(): string {
+    return this.selectedMainImage || this.product?.images?.[0] || '';
+  }
+
+  get thumbnailImages(): string[] {
+    return this.product?.images || [];
   }
 }

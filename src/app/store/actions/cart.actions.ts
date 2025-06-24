@@ -2,6 +2,19 @@ import { createAction, props } from '@ngrx/store';
 import { OrderItem } from '../../shared/models/order-item.model';
 import { Error } from '../../shared/models/error.model';
 
+// Load cart from localStorage
+export const loadCart = createAction('[Cart] Load Cart');
+
+export const loadCartSuccess = createAction(
+  '[Cart] Load Cart Success',
+  props<{ items: OrderItem[] }>()
+);
+
+export const loadCartFailure = createAction(
+  '[Cart] Load Cart Failure',
+  props<{ error: Error }>()
+);
+
 // Add item to cart
 export const addToCart = createAction(
   '[Cart] Add Item',
