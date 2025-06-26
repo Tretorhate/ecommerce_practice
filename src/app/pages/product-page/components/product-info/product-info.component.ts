@@ -1,86 +1,95 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { ProductReviewService } from '../../../../shared/services/product-review/product-review.service';
-import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+
+import { ProductReviewService } from '../../../../shared/services/product-review/product-review.service';
 import { CartService } from '../../../../shared/services/cart/cart.service';
 import { FavoritesService } from '../../../../shared/services/favorites/favorites.service';
-import { FormsModule } from '@angular/forms';
+
 @Component({
   selector: 'app-product-info',
+  standalone: true,
   templateUrl: './product-info.component.html',
   imports: [CommonModule, FormsModule],
 })
 export class ProductInfoComponent implements OnInit {
-  product: {
-    id: string;
-    title: string;
-    price: number;
-    installmentPrice: number;
-    installmentCount: number;
-    image: string;
-    thumbnailImages: string[];
-  } = {
+  product = {
     id: '',
     title: '',
     price: 0,
     installmentPrice: 0,
     installmentCount: 3,
     image: '',
-    thumbnailImages: [],
+    thumbnailImages: [] as string[],
   };
+
+  stores: { id: string; title: string }[] = [];
+  selectedStoreId: string | null = null;
+  isFavorite = false;
+
+  private readonly favoriteService = inject(FavoritesService);
 
   constructor(
     private productReviewService: ProductReviewService,
-    private route: ActivatedRoute,
     private cartService: CartService,
+    private route: ActivatedRoute
   ) {}
 
-  private favoriteService = inject(FavoritesService);
-  ngOnInit() {
-    const productId = this.route.snapshot.paramMap.get('id') || '';
+  ngOnInit(): void {
+    const productId = this.route.snapshot.paramMap.get('id');
     if (productId) {
-      this.productReviewService
-        .fetchProductById(productId)
-        .subscribe((data) => {
-          this.product.id = data.id;
-          this.product.title = data.title;
-          this.product.price = data.price;
-          this.product.installmentPrice = Math.round(data.price / 3);
-          this.product.image = data.images[0];
-          this.product.thumbnailImages = data.images;
-        });
+      this.productReviewService.fetchProductById(productId).subscribe((data) => {
+        this.product = {
+          id: data.id,
+          title: data.title,
+          price: data.price,
+          installmentPrice: Math.round(data.price / 3),
+          installmentCount: 3,
+          image: data.images[0],
+          thumbnailImages: data.images,
+        };
+
+        this.checkIfFavorite();
+      });
     }
 
-    this.getStores();
+    this.loadStores();
   }
 
-  changeMainImage(imageUrl: string) {
+  changeMainImage(imageUrl: string): void {
     this.product.image = imageUrl;
   }
-  stores: { id: string; title: string }[] = [];
-  selectedStoreId: string | null = null;
-  getStores() {
+
+  loadStores(): void {
     this.cartService.getStores().subscribe((stores) => {
       this.stores = stores;
-      if (stores.length > 0) {
-        this.selectedStoreId = stores[0].id;
-      }
+      this.selectedStoreId = stores[0]?.id || null;
     });
   }
-  selectStore(storeId: string) {
-    this.selectedStoreId = storeId;
-  }
 
-  addToCart(productId: string) {
-    if (this.selectedStoreId) {
-      this.cartService.addToCart(productId, this.selectedStoreId);
-    } else {
+  addToCart(productId: string): void {
+    if (!this.selectedStoreId) {
       alert('Пожалуйста, выберите магазин.');
+      return;
     }
-  }
-  isFavorite = false;
 
-  toggleFavorite() {
-    this.favoriteService.toggleFavorite(this.product.id);
+    this.cartService.addToCart(productId, this.selectedStoreId);
+  }
+
+  toggleFavorite(): void {
+    this.favoriteService.toggleFavorite(this.product.id).subscribe({
+      next: () => (this.isFavorite = !this.isFavorite),
+      error: (err) => console.error('Ошибка при переключении избранного', err),
+    });
+  }
+
+  checkIfFavorite(): void {
+    this.favoriteService.getFavorites().subscribe({
+      next: (favorites) => {
+        this.isFavorite = favorites.some((fav: any) => fav.id === this.product.id);
+      },
+      error: (err) => console.error('Ошибка при получении избранного', err),
+    });
   }
 }

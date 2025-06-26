@@ -1,7 +1,8 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ProductItem } from '../../models/product-item.model';
 import { RouterModule } from '@angular/router';
+import { FavoritesService } from '../../../shared/services/favorites/favorites.service';
 
 @Component({
   selector: 'app-product-card',
@@ -9,25 +10,31 @@ import { RouterModule } from '@angular/router';
   imports: [CommonModule, RouterModule],
   templateUrl: './product-card.component.html',
 })
-export class ProductCardComponent {
+export class ProductCardComponent implements OnInit {
   @Input() product!: ProductItem;
-
   stars = Array.from({ length: 5 });
+  isFav: boolean = false;
 
-  isFavorite = false;
+  constructor(private favoritesService: FavoritesService) {}
 
-  get rating(): number {
-    if (!this.product.reviews || this.product.reviews.length === 0) {
-      return 0;
-    }
-    const totalRating = this.product.reviews.reduce(
-      (sum, review) => sum + review.rating,
-      0
-    );
-    return Math.round(totalRating / this.product.reviews.length);
+  ngOnInit(): void {
+    this.isFav = this.product.isFavorite ?? false;
   }
 
-  toggleFavorite() {
-    this.isFavorite = !this.isFavorite;
+  get rating(): number {
+    if (!this.product.reviews || this.product.reviews.length === 0) return 0;
+    const total = this.product.reviews.reduce((sum, r) => sum + r.rating, 0);
+    return Math.round(total / this.product.reviews.length);
+  }
+
+  toggleFavorite(): void {
+    this.favoritesService.toggleFavorite(this.product.id).subscribe({
+      next: () => {
+        this.isFav = !this.isFav;
+      },
+      error: (error: any) => {
+        console.error('Ошибка избранного:', error);
+      },
+    });
   }
 }

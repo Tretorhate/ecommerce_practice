@@ -1,86 +1,82 @@
 <div class="flex flex-col md:flex-row gap-12 p-6 bg-white rounded-2xl  max-w-6xl mx-auto">
-    <!-- Left side: image and thumbnails -->
-    <div class="relative flex flex-col items-center w-full md:w-1/2">
-        <div class="absolute top-2 right-2 flex flex-col gap-2">
-            <div class="bg-red-500 text-white text-lg font-semibold rounded-full px-3 py-2.5">0•0•12</div>
-            <div class="bg-green-500 text-white text-lg font-semibold rounded-full px-3 py-2.5">5% Б</div>
-        </div>
-
-        <!-- Main product image -->
-        <img
-        [src]="product.image"
-        alt="Product image"
-        class="w-64 h-64 object-contain"
-        />
-        <p class="text-gray-500 text-sm mt-4">Чтобы увеличить, нажмите на картинку</p>
-
-        <!-- Thumbnail images -->
-        <div class="flex gap-2 mt-4">
-        <div
-            *ngFor="let thumbnail of product.thumbnailImages"
-            class="w-16 h-16 flex items-center justify-center cursor-pointer"
-            [ngClass]="thumbnail === product.image ? 'ring-2 ring-[#0089D0]' : ''"
-            (click)="changeMainImage(thumbnail)">
-        <img [src]="thumbnail" class="max-w-full max-h-full object-contain" />
-        </div>
+  <div class="relative flex flex-col items-center w-full md:w-1/2">
+    <div class="absolute top-2 right-2 flex flex-col gap-2">
+      <div class="bg-red-500 text-white text-lg font-semibold rounded-full px-3 py-2.5">0•0•12</div>
+      <div class="bg-green-500 text-white text-lg font-semibold rounded-full px-3 py-2.5">5% Б</div>
     </div>
-</div>
 
-    <!-- Right side: product information -->
-    <div class="flex flex-col w-full md:w-1/2">
-        <h3 class="text-[#0089D0] text-2xl font-normal m-0">{{ product.title }}</h3>
-        <div class="text-[#888] text-xs mt-3">
-        <span>Артикул:</span> {{ product.id }}
-        </div>
-        <div class="w-full h-[1px] bg-[#eae7e7] mb-2 mt-2"></div>
-        <div class="grid grid-cols-[minmax(110px,_max-content)_1fr] text-base my-1 mb-1 gap-y-1">
-        <div class="text-[#888]">Цена</div>
-        <div class="text-[#888] pl-3 border-l border-[#ddd]">В рассрочку</div>
-        <div class="font-semibold text-2xl text-[#333]">
-            {{ product.price | number }} ₸ㅤ
-        </div>
-        <div class="flex items-center text-lg font-bold pl-3 border-l border-[#ddd]">
+    <img
+      [src]="product.image"
+      alt="Product image"
+      class="w-64 h-64 object-contain"
+    />
+    <p class="text-gray-500 text-sm mt-4">Чтобы увеличить, нажмите на картинку</p>
+
+    <div class="flex gap-2 mt-4">
+      <div
+        *ngFor="let thumbnail of product.thumbnailImages"
+        class="w-16 h-16 flex items-center justify-center cursor-pointer"
+        [ngClass]="thumbnail === product.image ? 'ring-2 ring-[#0089D0]' : ''"
+        (click)="changeMainImage(thumbnail)">
+        <img [src]="thumbnail" class="max-w-full max-h-full object-contain" />
+      </div>
+    </div>
+  </div>
+
+  <div class="flex flex-col w-full md:w-1/2">
+    <h3 class="text-[#0089D0] text-2xl font-normal m-0">{{ product.title }}</h3>
+    <div class="text-[#888] text-xs mt-3">
+      <span>Артикул:</span> {{ product.id }}
+    </div>
+    <div class="w-full h-[1px] bg-[#eae7e7] mb-2 mt-2"></div>
+    <div class="grid grid-cols-[minmax(110px,_max-content)_1fr] text-base my-1 mb-1 gap-y-1">
+      <div class="text-[#888]">Цена</div>
+      <div class="text-[#888] pl-3 border-l border-[#ddd]">В рассрочку</div>
+      <div class="font-semibold text-2xl text-[#333]">
+        {{ product.price | number }} ₸ㅤ
+      </div>
+      <div class="flex items-center text-lg font-bold pl-3 border-l border-[#ddd]">
             <span class="bg-[#ffd300] px-2 py-0.5 mr-1 text-[#333] text-lg font-semibold">
             {{ product.installmentPrice | number }} ₸
             </span>
-            <span class="text-[#a9a7a7] font-normal">×{{ product.installmentCount }}</span>
-        </div>
-        </div>
-        <div class="w-full h-[1.1px] bg-[#eae7e7] mb-2 mt-2"></div>
-        <div class="mb-4">
-            <label for="store-select" class="block text-base font-medium text-gray-700">Выберите магазин:</label>
-            <select
-              id="store-select"
-              [(ngModel)]="selectedStoreId"
-              class="mt-1 block w-auto pl-3 pr-10 py-2 text-base border-gray-700 focus:outline-none focus:ring-gray-300 focus:border-gray-500 sm:text-lg text-gray-600 rounded-md"
-            >
-              <option *ngFor="let store of stores" [value]="store.id">{{ store.title }}</option>
-            </select>
-          </div>
-        <div class="flex items-center gap-2 w-full">
-            <button
-                class="bg-[#0089D0] hover:bg-[#0078B0] text-white font-medium py-3 rounded-md text-base flex-1 cursor-pointer"
-                (click)="addToCart(product.id)">
-                Добавить в корзину
-            </button>
-            <button
-                (click)="isFavorite = !isFavorite"
-                class="w-12 h-12 flex-shrink-0 rounded-full flex items-center justify-center transition-colors duration-200 cursor-pointer"
-                [ngClass]="isFavorite ? 'text-red-500' : 'text-gray-400'">
-                <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-                class="w-8 h-8">
-                <path
-                    d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 
-                        2 5.42 4.42 3 7.5 3c1.74 0 3.41 0.81 4.5 
-                        2.09C13.09 3.81 14.76 3 16.5 
-                        3 19.58 3 22 5.42 22 8.5c0 
-                        3.78-3.4 6.86-8.55 11.54L12 
-                        21.35z"/>
-                </svg>
-            </button>
-            </div>
+        <span class="text-[#a9a7a7] font-normal">×{{ product.installmentCount }}</span>
+      </div>
     </div>
+    <div class="w-full h-[1.1px] bg-[#eae7e7] mb-2 mt-2"></div>
+    <div class="mb-4">
+      <label for="store-select" class="block text-base font-medium text-gray-700">Выберите магазин:</label>
+      <select
+        id="store-select"
+        [(ngModel)]="selectedStoreId"
+        class="mt-1 block w-auto pl-3 pr-10 py-2 text-base border-gray-700 focus:outline-none focus:ring-gray-300 focus:border-gray-500 sm:text-lg text-gray-600 rounded-md"
+      >
+        <option *ngFor="let store of stores" [value]="store.id">{{ store.title }}</option>
+      </select>
+    </div>
+    <div class="flex items-center gap-2 w-full">
+      <button
+        class="bg-[#0089D0] hover:bg-[#0078B0] text-white font-medium py-3 rounded-md text-base flex-1 cursor-pointer"
+        (click)="addToCart(product.id)">
+        Добавить в корзину
+      </button>
+      <button
+        (click)="toggleFavorite()"
+        class="w-12 h-12 flex-shrink-0 rounded-full flex items-center justify-center transition-colors duration-200 cursor-pointer"
+        [ngClass]="isFavorite ? 'text-red-500' : 'text-gray-400'">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="currentColor"
+          viewBox="0 0 24 24"
+          class="w-8 h-8">
+          <path
+            d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5
+                        2 5.42 4.42 3 7.5 3c1.74 0 3.41 0.81 4.5
+                        2.09C13.09 3.81 14.76 3 16.5
+                        3 19.58 3 22 5.42 22 8.5c0
+                        3.78-3.4 6.86-8.55 11.54L12
+                        21.35z"/>
+        </svg>
+      </button>
+    </div>
+  </div>
 </div>
