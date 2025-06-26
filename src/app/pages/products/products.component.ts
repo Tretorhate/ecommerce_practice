@@ -126,7 +126,6 @@ export class ProductsComponent implements OnInit {
 
   ngOnInit(): void {
     this.store.dispatch(loadProducts({}));
-
     // Listen to route param and query param changes
     this.route.paramMap.subscribe((params) => {
       const category = params.get('category');
@@ -146,6 +145,7 @@ export class ProductsComponent implements OnInit {
     const stores = queryParams.get('stores');
     const ratings = queryParams.get('ratings');
     const searchTerm = queryParams.get('searchTerm');
+    const category = queryParams.get('category');
 
     this.minPriceSubject.next(minPrice ? +minPrice : null);
     this.maxPriceSubject.next(maxPrice ? +maxPrice : null);
@@ -154,6 +154,7 @@ export class ProductsComponent implements OnInit {
       ratings ? ratings.split(',').map((r) => +r) : []
     );
     this.searchTermSubject.next(searchTerm);
+    this.selectedCategorySubject.next(category);
   }
 
   trackByProductId(index: number, product: ProductItem) {
@@ -161,13 +162,23 @@ export class ProductsComponent implements OnInit {
   }
 
   updateRouteWithFilters() {
-    const queryParams: any = {};
-    if (this.minPrice != null) queryParams.minPrice = this.minPrice;
-    if (this.maxPrice != null) queryParams.maxPrice = this.maxPrice;
-    if (this.selectedStores.length > 0)
-      queryParams.stores = this.selectedStores.join(',');
-    if (this.selectedRatings.length > 0)
-      queryParams.ratings = this.selectedRatings.join(',');
+    const queryParams: Record<string, any> = {
+      category: this.selectedCategory ?? null,
+
+      minPrice: this.minPrice != null ? this.minPrice : null,
+      maxPrice: this.maxPrice != null ? this.maxPrice : null,
+
+      stores:
+        this.selectedStores.length > 0
+          ? this.selectedStores.join(',')
+          : null,
+      ratings:
+        this.selectedRatings.length > 0
+          ? this.selectedRatings.join(',')
+          : null,
+
+      searchTerm: this.searchTermSubject.value || null,
+    };
 
     this.router.navigate([], {
       relativeTo: this.route,
@@ -185,9 +196,19 @@ export class ProductsComponent implements OnInit {
     this.router.navigate(['/category']);
   }
 
-  onCategorySelected(categoryId: string) {
+  onCategorySelected(categoryId: string | null) {
     this.selectedCategorySubject.next(categoryId);
-    this.updateRouteWithFilters();
+    const queryParams: any = { ...this.route.snapshot.queryParams };
+    if (categoryId) {
+      queryParams.category = categoryId;
+    } else {
+      delete queryParams.category;
+    }
+
+    this.router.navigate(['/category'], {
+      queryParams,
+      queryParamsHandling: 'merge',
+    });
   }
 
   onPriceChange() {

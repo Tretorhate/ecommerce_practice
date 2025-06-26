@@ -20,7 +20,7 @@ import { RouterModule } from '@angular/router';
 })
 export class CategoryFilterComponent implements OnChanges {
   @Input() activeCategoryId: string | null = null;
-  @Output() categorySelected = new EventEmitter<string>();
+  @Output() categorySelected = new EventEmitter<string | null>();
 
   categories: Category[] = [];
   expanded: { [id: string]: boolean } = {};

@@ -26,9 +26,10 @@ export class ProductFilterService {
     } = params;
 
     return products.filter((p) => {
-      const matchCategory = categoryId
-        ? this.belongsToCategoryTree(p, categoryId, categories)
-        : true;
+      const matchCategory =
+        !categoryId || categoryId === 'null' || categoryId === 'undefined'
+          ? true
+          : this.belongsToCategoryTree(p, categoryId, categories);
 
       const matchPriceMin = minPrice == null || p.price >= minPrice;
       const matchPriceMax = maxPrice == null || p.price <= maxPrice;

@@ -87,8 +87,9 @@ export class HeaderComponent implements OnInit {
       return;
     }
 
+    const currentParams = { ...this.router.routerState.snapshot.root.queryParams };
     this.router.navigate(['/category'], {
-      queryParams: { searchTerm: term },
+      queryParams: { ...currentParams, searchTerm: term },
       queryParamsHandling: 'merge',
     });
   }
