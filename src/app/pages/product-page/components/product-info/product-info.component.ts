@@ -2,10 +2,14 @@ import { Component, inject, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-
 import { ProductReviewService } from '../../../../shared/services/product-review/product-review.service';
 import { CartService } from '../../../../shared/services/cart/cart.service';
+import { Store } from '@ngrx/store';
+import { ProductItem } from '../../../../shared/models/product-item.model';
 import { FavoritesService } from '../../../../shared/services/favorites/favorites.service';
+import * as CartActions from '../../../../store/actions/cart.actions';
+import { CartSidebarService } from '../../../../shared/services/cart-sidebar.service';
+import { ProductService } from '../../../../shared/services/product.service';
 
 @Component({
   selector: 'app-product-info',
@@ -23,6 +27,7 @@ export class ProductInfoComponent implements OnInit {
     image: '',
     thumbnailImages: [] as string[],
   };
+
 
   stores: { id: string; title: string }[] = [];
   selectedStoreId: string | null = null;
@@ -91,5 +96,6 @@ export class ProductInfoComponent implements OnInit {
       },
       error: (err) => console.error('Ошибка при получении избранного', err),
     });
+
   }
 }

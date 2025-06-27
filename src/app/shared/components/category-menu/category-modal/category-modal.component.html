@@ -41,8 +41,11 @@
       <div class="flex flex-wrap gap-3 mb-8">
         @for (child of currentCategory!.children ?? []; track child.id) {
         <a
-          [routerLink]="['/c', child.id]"
+          [routerLink]="['/category']"
+          [queryParams]="{ category: child.id }"
+          queryParamsHandling="merge"
           class="text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded cursor-pointer transition-colors block"
+          (click)="$event.stopPropagation()"
         >
           {{ child.title }}
         </a>
@@ -62,8 +65,11 @@
           >
             @for (sub of child.children; track sub.id) {
             <a
-              [routerLink]="['/c', sub.id]"
+              [routerLink]="['/category']"
+              [queryParams]="{ category: sub.id }"
+              queryParamsHandling="merge"
               class="text-blue-600 hover:text-blue-800 cursor-pointer text-sm block"
+              (click)="$event.stopPropagation()"
             >
               {{ sub.title }}
             </a>

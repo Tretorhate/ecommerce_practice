@@ -1,69 +1,63 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+import { Store } from '@ngrx/store';
 import { CartCardComponent } from '../cart-card/cart-card.component';
-import { OrderService } from '../../services/cart/order.service';
+import * as CartActions from '../../../store/actions/cart.actions';
+import { CartSidebarService } from '../../services/cart-sidebar.service';
 
 @Component({
   selector: 'app-cart-sidebar',
-  imports: [CartCardComponent, CommonModule],
+  imports: [CartCardComponent, CommonModule, RouterModule],
   templateUrl: './cart-sidebar.component.html',
 })
 export class CartSidebarComponent {
   @Input() products: any[] = [];
   @Output() cartUpdated = new EventEmitter<void>();
-  isOpen = false;
 
-  constructor(private orderService: OrderService) {}
+  constructor(
+    private store: Store,
+    private cartSidebarService: CartSidebarService
+  ) {}
+
+  get isOpen$() {
+    return this.cartSidebarService.isOpen$;
+  }
 
   openSidebar() {
-    this.isOpen = true;
+    this.cartSidebarService.openSidebar();
   }
 
   closeSidebar() {
-    this.isOpen = false;
+    this.cartSidebarService.closeSidebar();
   }
 
   getTotalQuantity(): number {
     return this.products.reduce(
       (total, product) => total + (product.quantity || 1),
-      0,
+      0
     );
   }
 
   getTotalPrice(): number {
     return this.products.reduce(
       (total, product) => total + product.price * (product.quantity || 1),
-      0,
+      0
     );
   }
 
-  removeProduct(productId: string, storeId: string) {
-    this.products = this.products.filter(
-      (product) => !(product.id === productId && product.storeId === storeId),
-    );
-    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-    const updatedCart = cart.filter(
-      (item: { productId: string; storeId: string }) =>
-        !(item.productId === productId && item.storeId === storeId),
-    );
-    localStorage.setItem('cart', JSON.stringify(updatedCart));
+  removeProduct(productId: string) {
+    this.store.dispatch(CartActions.removeFromCart({ itemId: productId }));
     this.cartUpdated.emit();
   }
 
-  updateTotal() {}
+  updateTotal() {
+    // This will be handled by the store automatically
+  }
 
-  order() {
-    const items = this.products.map((product) => ({
-      productId: product.id,
-      quantity: product.quantity,
-      storeId: product.storeId,
-      price: product.price,
-    }));
-
-    this.orderService.createOrder(items).subscribe(
-      () => alert('Заказ успешно оформлен!'),
-      () => alert('Ошибка при оформлении заказа.'),
+  updateQuantity(itemId: string, quantity: number) {
+    this.store.dispatch(
+      CartActions.updateCartItemQuantity({ itemId, quantity })
     );
   }
 }
-

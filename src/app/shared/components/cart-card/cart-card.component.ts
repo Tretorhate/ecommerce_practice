@@ -11,10 +11,10 @@ export class CartCardComponent {
     id: string;
     title: string;
     price: number;
-    image: string;
-    quantity: 1;
-    storeId: string;
-    storeTitle: string;
+    images: string[];
+    quantity: number;
+    storeId?: string;
+    storeTitle?: string;
   };
   @Input() storeTitle!: string;
   @Output() quantityChange = new EventEmitter<number>();
@@ -25,6 +25,10 @@ export class CartCardComponent {
 
   get totalPrice(): number {
     return this.product.price * this.product.quantity;
+  }
+
+  get productImage(): string {
+    return this.product.images?.[0] || '';
   }
 
   increment() {
@@ -39,8 +43,15 @@ export class CartCardComponent {
     } else {
       this.removeProduct.emit({
         productId: this.product.id,
-        storeId: this.product.storeId,
+        storeId: this.product.storeId || '',
       });
+    }
+  }
+
+  onImageError(event: Event) {
+    const target = event.target as HTMLImageElement;
+    if (target) {
+      target.style.display = 'none';
     }
   }
 }

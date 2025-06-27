@@ -9,9 +9,9 @@
       @for (category of categories; track category.id) {
       <li (mouseenter)="onCategoryHover(category.id)" class="relative">
         <a
-          [routerLink]="
-            category.id === 'all' ? ['/category'] : ['/c', category.id]
-          "
+          [routerLink]="['/category']"
+          [queryParams]="category.id === 'all' ? { category: null } : { category: category.id }"
+          queryParamsHandling="merge"
           class="hover:underline border-l border-[#0089D0] w-[106px] h-14 flex items-center justify-center text-center whitespace-normal text-sm"
         >
           {{ category.title }}

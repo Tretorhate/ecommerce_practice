@@ -1,17 +1,19 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ProductItem } from '../../models/product-item.model';
 import { RouterModule } from '@angular/router';
 import { FavoritesService } from '../../../shared/services/favorites/favorites.service';
+import { ProductItem } from '../../models/product-item.model';
+
+
 
 @Component({
   selector: 'app-product-card',
-  standalone: true,
   imports: [CommonModule, RouterModule],
   templateUrl: './product-card.component.html',
 })
 export class ProductCardComponent implements OnInit {
   @Input() product!: ProductItem;
+
   stars = Array.from({ length: 5 });
   isFav: boolean = false;
 
@@ -19,7 +21,7 @@ export class ProductCardComponent implements OnInit {
 
   ngOnInit(): void {
     this.isFav = this.product.isFavorite ?? false;
-  }
+
 
   get rating(): number {
     if (!this.product.reviews || this.product.reviews.length === 0) return 0;
@@ -27,7 +29,7 @@ export class ProductCardComponent implements OnInit {
     return Math.round(total / this.product.reviews.length);
   }
 
-  toggleFavorite(): void {
+ toggleFavorite(): void {
     this.favoritesService.toggleFavorite(this.product.id).subscribe({
       next: () => {
         this.isFav = !this.isFav;

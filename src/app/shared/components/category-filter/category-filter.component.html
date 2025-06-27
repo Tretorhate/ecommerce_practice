@@ -1,7 +1,11 @@
 <div class="text-[#0089D0]">
   <a
     [routerLink]="['/category']"
+    [queryParams]="{ category: null }"
+    queryParamsHandling="merge"
+    (click)="categorySelected.emit(null)"
     class="font-semibold mb-3 hover:underline block"
+    [ngClass]="{ 'text-blue-600': !activeCategoryId, 'font-semibold': !activeCategoryId }"
   >
     ВСЕ КАТЕГОРИИ
   </a>
@@ -31,10 +35,13 @@
         }
 
         <a
-          [routerLink]="['/c', cat.id]"
+          [routerLink]="['/category']"
+          [queryParams]="{ category: cat.id }"
+          queryParamsHandling="merge"
+          (click)="categorySelected.emit(cat.id)"
           class="hover:underline text-left flex-1"
           [ngClass]="{
-            'text-blue-600 font-semibold': activeCategoryId === cat.id
+            'text-blue-600 font-semibold': isCategoryActive(cat.id)
           }"
         >
           {{ cat.title }}
@@ -69,10 +76,13 @@
             }
 
             <a
-              [routerLink]="['/c', sub.id]"
+              [routerLink]="['/category']"
+              [queryParams]="{ category: sub.id }"
+              queryParamsHandling="merge"
+              (click)="categorySelected.emit(sub.id)"
               class="hover:underline text-left flex-1"
               [ngClass]="{
-                'text-blue-600 font-semibold': activeCategoryId === sub.id
+                'text-blue-600 font-semibold': isCategoryActive(sub.id)
               }"
             >
               {{ sub.title }}
@@ -85,10 +95,13 @@
             @for (sub2 of sub.children; track sub2.id) {
             <li class="text-[11px]">
               <a
-                [routerLink]="['/c', sub2.id]"
+                [routerLink]="['/category']"
+                [queryParams]="{ category: sub2.id }"
+                queryParamsHandling="merge"
+                (click)="categorySelected.emit(sub2.id)"
                 class="hover:underline text-left w-full"
                 [ngClass]="{
-                  'text-blue-600 font-semibold': activeCategoryId === sub2.id
+                  'text-blue-600 font-semibold': isCategoryActive(sub2.id)
                 }"
               >
                 {{ sub2.title }}

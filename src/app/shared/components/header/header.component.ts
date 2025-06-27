@@ -1,64 +1,96 @@
 import { Component, OnInit, signal } from '@angular/core';
-import { CartService } from '../../services/cart/cart.service';
-import { CartSidebarComponent } from '../cart-sidebar/cart-sidebar.component';
+import { CommonModule } from '@angular/common';
+import { RouterModule, Router } from '@angular/router';
+import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs';
 import { CategoryMenuComponent } from '../category-menu/category-menu.component';
+import { CartSidebarComponent } from '../cart-sidebar/cart-sidebar.component';
+import { OrderItem } from '../../models/order-item.model';
+import * as CartSelectors from '../../../store/selectors/cart.selectors';
+import { CartSidebarService } from '../../services/cart-sidebar.service';
 import { AuthService } from '../../services/auth/auth.service';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-header',
-  imports: [CategoryMenuComponent, CartSidebarComponent],
+  imports: [
+    CommonModule,
+    RouterModule,
+    CategoryMenuComponent,
+    CartSidebarComponent,
+    FormsModule,
+  ],
   templateUrl: './header.component.html',
 })
 export class HeaderComponent implements OnInit {
+  cartItems$: Observable<OrderItem[]>;
+  cartItemCount$: Observable<number>;
+  cartTotal$: Observable<number>;
   products: any[] = [];
-  cart: { productId: string; storeId: string }[] = [];
-  
+  isLoggedIn = signal(false);
+  searchTerm: string = '';
+
   constructor(
-    private cartService: CartService,
-    private authService: AuthService
-  ) { }
-  
-  onLogout() {
-    this.authService.logout();
+    private store: Store,
+    private cartSidebarService: CartSidebarService,
+    private authService: AuthService,
+    private router: Router
+  ) {
+    this.cartItems$ = this.store.select(CartSelectors.selectCartItems);
+    this.cartItemCount$ = this.store.select(CartSelectors.selectCartItemCount);
+    this.cartTotal$ = this.store.select(CartSelectors.selectCartTotal);
   }
-  isLoggedIn = signal(false)
+
   ngOnInit() {
     const isLoggedIn$ = this.authService.isLoggedIn();
-  isLoggedIn$.subscribe((value) => this.isLoggedIn.set(value));
-    this.cartService.cart$.subscribe((cart) => {
-      this.cart = cart;
-      this.loadProducts();
+    isLoggedIn$.subscribe((value) => this.isLoggedIn.set(value));
+
+    this.cartItems$.subscribe((cartItems: OrderItem[]) => {
+      this.loadProducts(cartItems);
     });
   }
 
-  loadCart() {
-    const cart = localStorage.getItem('cart');
-    this.cart = cart ? JSON.parse(cart) : [];
+  loadProducts(cartItems: OrderItem[]) {
+    if (cartItems.length > 0) {
+      this.products = cartItems.map((orderItem) => ({
+        id: orderItem.id,
+        title: orderItem.product?.title || '',
+        price: orderItem.price,
+        images: orderItem.product?.images || [],
+        quantity: orderItem.quantity,
+      }));
+    } else {
+      this.products = [];
+    }
   }
 
-  loadProducts() {
-    if (this.cart.length > 0) {
-      const productIds = this.cart
-        .map((item) => item.productId)
-        .filter((id) => id);
+  loadCart() {
+    // This method is called by cart sidebar when cart is updated
+    // The store will automatically update the observables
+  }
 
-      this.cartService.getProductsByIds(productIds).subscribe((products) => {
-        this.cartService.getStores().subscribe((stores) => {
-          this.products = this.cart.map((cartItem) => {
-            const product = products.find((p) => p.id === cartItem.productId);
-            const store = stores.find((s) => s.id === cartItem.storeId);
-            return {
-              id: product.id,
-              title: product.title,
-              price: product.price,
-              image: product.images[0],
-              quantity: 1,
-              storeId: cartItem.storeId,
-              storeTitle: store ? store.title : cartItem.storeId,
-            };
-          });
-        });
-      });
+  openCartSidebar() {
+    this.cartSidebarService.openSidebar();
+  }
+
+  onLogout() {
+    this.authService.logout();
+  }
+
+  onSearch(event?: Event) {
+    if (event) {
+      event.preventDefault();
     }
+
+    const term = this.searchTerm.trim();
+    if (!term) {
+      return;
+    }
+
+    const currentParams = { ...this.router.routerState.snapshot.root.queryParams };
+    this.router.navigate(['/category'], {
+      queryParams: { ...currentParams, searchTerm: term },
+      queryParamsHandling: 'merge',
+    });
   }
 }
