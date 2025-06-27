@@ -1,13 +1,16 @@
-<div class="w-32 h-32 sm:w-48 sm:h-48  relative rounded-full overflow-hidden group">
+<div
+  class="w-32 h-32 sm:w-48 sm:h-48 relative rounded-full overflow-hidden group"
+>
   @if (isPictureLoading()) {
-  <span class="loader self-center" style="--loader-color: blue; --loader-size: 36px"></span>
+  <span
+    class="loader self-center"
+    style="--loader-color: blue; --loader-size: 36px"
+  ></span>
   } @else {
 
   <img
     [src]="
-      pictureUrl()
-        ? 'https://practiceapi.mooo.com' + pictureUrl()
-        : 'https://practiceapi.mooo.com/uploads/no-user-image.png'
+      pictureUrl() || 'https://practiceapi.mooo.com/uploads/no-user-image.png'
     "
     alt="Аватар"
     class="w-full h-full object-cover rounded-full"
