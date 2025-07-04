@@ -23,15 +23,14 @@
       }}</span>
       <span class="text-sm">KZT</span>
       <span class="pi pi-angle-down text-xl cursor-pointer"></span>
+
+      <a href="/favorites" class="mx-2">
+        <i class="pi pi-heart text-xl hover:text-red-500 transition-colors"></i>
+      </a>
+
       <a href="/profile">
         <img src="svg/profile.svg" alt="Профиль" class="w-7 h-7" />
       </a>
-
-      @if (isLoggedIn()) {
-      <button class="mx-3 hover:text-blue-700" (click)="onLogout()">
-        Выйти
-      </button>
-      }
 
       <!-- Cart Icon with Count -->
       <div class="relative pl-4">

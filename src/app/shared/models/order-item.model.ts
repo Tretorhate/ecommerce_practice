@@ -11,4 +11,5 @@ export interface OrderItem {
     images?: string[];
   };
   storeId: string;
+  storeTitle?: string;
 }

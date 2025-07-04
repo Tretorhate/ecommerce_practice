@@ -35,4 +35,20 @@ export class StoreService {
       })
     );
   }
+
+  getStoresForProduct(productId: string): Observable<StoreFilter[]> {
+    return this.store.select(selectProducts).pipe(
+      map((products: ProductItem[]) => {
+        const product = products.find(p => p.id === productId);
+        if (!product || !product.store) {
+          return [];
+        }
+        
+        return [{
+          id: product.store.id,
+          title: product.store.title,
+        }];
+      })
+    );
+  }
 }

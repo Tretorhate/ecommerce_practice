@@ -1,15 +1,24 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ProductReviewService } from '../../../../shared/services/product-review/product-review.service';
 import { CartService } from '../../../../shared/services/cart/cart.service';
+import {
+  StoreService,
+  StoreFilter,
+} from '../../../../shared/services/store.service';
 import { Store } from '@ngrx/store';
 import { ProductItem } from '../../../../shared/models/product-item.model';
 import { FavoritesService } from '../../../../shared/services/favorites/favorites.service';
 import * as CartActions from '../../../../store/actions/cart.actions';
+import * as ProductsActions from '../../../../store/actions/products.actions';
 import { CartSidebarService } from '../../../../shared/services/cart-sidebar.service';
-import { ProductService } from '../../../../shared/services/product.service';
+import {
+  selectProductById,
+  selectProductsLoading,
+} from '../../../../store/selectors/products.selectors';
+import { Observable, map, filter, take, Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-product-info',
@@ -17,7 +26,7 @@ import { ProductService } from '../../../../shared/services/product.service';
   templateUrl: './product-info.component.html',
   imports: [CommonModule, FormsModule],
 })
-export class ProductInfoComponent implements OnInit {
+export class ProductInfoComponent implements OnInit, OnDestroy {
   product = {
     id: '',
     title: '',
@@ -28,38 +37,74 @@ export class ProductInfoComponent implements OnInit {
     thumbnailImages: [] as string[],
   };
 
-
-  stores: { id: string; title: string }[] = [];
+  stores: StoreFilter[] = [];
   selectedStoreId: string | null = null;
   isFavorite = false;
+  productData$!: Observable<ProductItem | undefined>;
+  loading$!: Observable<boolean>;
+  productId: string | null = null;
 
+  private destroy$ = new Subject<void>();
   private readonly favoriteService = inject(FavoritesService);
 
   constructor(
-    private productReviewService: ProductReviewService,
     private cartService: CartService,
-    private route: ActivatedRoute
+    private storeService: StoreService,
+    private route: ActivatedRoute,
+    private store: Store,
+    private cartSidebarService: CartSidebarService
   ) {}
 
   ngOnInit(): void {
     const productId = this.route.snapshot.paramMap.get('id');
-    if (productId) {
-      this.productReviewService.fetchProductById(productId).subscribe((data) => {
-        this.product = {
-          id: data.id,
-          title: data.title,
-          price: data.price,
-          installmentPrice: Math.round(data.price / 3),
-          installmentCount: 3,
-          image: data.images[0],
-          thumbnailImages: data.images,
-        };
+    if (!productId) return;
 
-        this.checkIfFavorite();
+    this.productId = productId;
+
+    this.productData$ = this.store.select(selectProductById(productId));
+    this.loading$ = this.store.select(selectProductsLoading);
+
+    this.productData$.pipe(take(1)).subscribe((product) => {
+      if (!product) {
+        // Product not in store, dispatch action to load it
+        this.store.dispatch(ProductsActions.loadProduct({ id: productId }));
+      }
+    });
+
+    this.productData$
+      .pipe(
+        filter(Boolean), // Only emit when product exists
+        takeUntil(this.destroy$)
+      )
+      .subscribe((data) => {
+        this.updateProductDisplay(data);
       });
-    }
 
     this.loadStores();
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  private updateProductDisplay(data: ProductItem): void {
+    this.product = {
+      id: data.id,
+      title: data.title,
+      price: data.price,
+      installmentPrice: Math.round(data.price / 3),
+      installmentCount: 3,
+      image: data.images[0],
+      thumbnailImages: data.images,
+    };
+
+    this.favoriteService
+      .checkFavoriteStatus(data)
+      .pipe(take(1))
+      .subscribe((isFavorite) => {
+        this.isFavorite = isFavorite;
+      });
   }
 
   changeMainImage(imageUrl: string): void {
@@ -67,35 +112,58 @@ export class ProductInfoComponent implements OnInit {
   }
 
   loadStores(): void {
-    this.cartService.getStores().subscribe((stores) => {
-      this.stores = stores;
-      this.selectedStoreId = stores[0]?.id || null;
-    });
+    if (!this.productId) return;
+
+    this.storeService
+      .getStoresForProduct(this.productId)
+      .subscribe((stores) => {
+        this.stores = stores;
+        this.selectedStoreId = stores[0]?.id || null;
+      });
   }
 
-  addToCart(productId: string): void {
-    if (!this.selectedStoreId) {
-      alert('Пожалуйста, выберите магазин.');
-      return;
-    }
+  addToCart(): void {
+    this.productData$.pipe(take(1)).subscribe((productData) => {
+      if (!productData) {
+        alert('Данные продукта не загружены.');
+        return;
+      }
 
-    this.cartService.addToCart(productId, this.selectedStoreId);
+      if (!this.selectedStoreId) {
+        alert('Пожалуйста, выберите магазин.');
+        return;
+      }
+
+      const cartItem = this.cartService.createCartItemFromProduct(
+        productData,
+        1
+      );
+
+      cartItem.storeId = this.selectedStoreId;
+      const selectedStore = this.stores.find(
+        (store) => store.id === this.selectedStoreId
+      );
+      cartItem.storeTitle = selectedStore?.title || 'Неизвестный магазин';
+
+      this.store.dispatch(CartActions.addToCart({ item: cartItem }));
+
+      this.cartSidebarService.openSidebar();
+    });
   }
 
   toggleFavorite(): void {
-    this.favoriteService.toggleFavorite(this.product.id).subscribe({
-      next: () => (this.isFavorite = !this.isFavorite),
-      error: (err) => console.error('Ошибка при переключении избранного', err),
+    this.productData$.pipe(take(1)).subscribe((productData) => {
+      if (productData) {
+        this.favoriteService
+          .toggleFavoriteWithStoreUpdate(productData, this.isFavorite)
+          .subscribe({
+            next: (newStatus) => {
+              this.isFavorite = newStatus;
+            },
+            error: (err) =>
+              console.error('Ошибка при переключении избранного', err),
+          });
+      }
     });
-  }
-
-  checkIfFavorite(): void {
-    this.favoriteService.getFavorites().subscribe({
-      next: (favorites) => {
-        this.isFavorite = favorites.some((fav: any) => fav.id === this.product.id);
-      },
-      error: (err) => console.error('Ошибка при получении избранного', err),
-    });
-
   }
 }

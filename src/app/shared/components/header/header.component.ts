@@ -58,6 +58,7 @@ export class HeaderComponent implements OnInit {
         price: orderItem.price,
         images: orderItem.product?.images || [],
         quantity: orderItem.quantity,
+        storeTitle: orderItem.storeTitle || 'Неизвестный магазин',
       }));
     } else {
       this.products = [];
@@ -87,7 +88,9 @@ export class HeaderComponent implements OnInit {
       return;
     }
 
-    const currentParams = { ...this.router.routerState.snapshot.root.queryParams };
+    const currentParams = {
+      ...this.router.routerState.snapshot.root.queryParams,
+    };
     this.router.navigate(['/category'], {
       queryParams: { ...currentParams, searchTerm: term },
       queryParamsHandling: 'merge',
