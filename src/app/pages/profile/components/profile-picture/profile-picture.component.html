@@ -10,7 +10,9 @@
 
   <img
     [src]="
-      pictureUrl() || 'https://practiceapi.mooo.com/uploads/no-user-image.png'
+      pictureUrl()
+        ? 'https://practiceapi.mooo.com' + pictureUrl()
+        : 'https://practiceapi.mooo.com/uploads/no-user-image.png'
     "
     alt="Аватар"
     class="w-full h-full object-cover rounded-full"
