@@ -26,4 +26,6 @@ export interface ProductItem {
     createdAt: string;
     updatedAt: string;
   };
+
+  isFavorite?: boolean;
 }

@@ -18,3 +18,8 @@ export const selectProductsError = createSelector(
   selectProductsState,
   (state) => state.error
 );
+
+export const selectProductById = (productId: string) =>
+  createSelector(selectProducts, (products) =>
+    products.find((product) => product.id === productId)
+  );

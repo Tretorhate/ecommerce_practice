@@ -37,6 +37,7 @@
       <app-cart-card
         *ngFor="let product of products; let i = index"
         [product]="product"
+        [storeTitle]="product.storeTitle || 'Неизвестный магазин'"
         (quantityChange)="updateQuantity(product.id, $event)"
         (removeProduct)="removeProduct(product.id)"
       >

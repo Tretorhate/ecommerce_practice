@@ -1,8 +1,12 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject, of } from 'rxjs';
+import { Store } from '@ngrx/store';
+import { take } from 'rxjs/operators';
 import { OrderItem } from '../../models/order-item.model';
 import { ProductItem } from '../../models/product-item.model';
+import * as CartActions from '../../../store/actions/cart.actions';
+import { selectCartItems } from '../../../store/selectors/cart.selectors';
 
 @Injectable({
   providedIn: 'root',
@@ -10,7 +14,7 @@ import { ProductItem } from '../../models/product-item.model';
 export class CartService {
   private cartSubject = new BehaviorSubject<OrderItem[]>(this.loadCart());
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private store: Store) {}
 
   get cart$(): Observable<OrderItem[]> {
     return this.cartSubject.asObservable();
@@ -19,7 +23,19 @@ export class CartService {
   loadCart(): OrderItem[] {
     try {
       const cart = localStorage.getItem('cart');
-      return cart ? JSON.parse(cart) : [];
+      const items = cart ? JSON.parse(cart) : [];
+
+      const migratedItems = items.map((item: OrderItem) => {
+        if (!item.storeTitle) {
+          return {
+            ...item,
+            storeTitle: 'Неизвестный магазин',
+          };
+        }
+        return item;
+      });
+
+      return migratedItems;
     } catch (error) {
       console.error('Error loading cart from localStorage:', error);
       return [];
@@ -74,7 +90,58 @@ export class CartService {
     return of(void 0);
   }
 
-  // Utility method to create cart item from product
+  syncWithStore(items: OrderItem[]): void {
+    this.saveCart(items);
+  }
+  addProductToCart(product: ProductItem, quantity: number = 1): void {
+    const cartItem = this.createCartItemFromProduct(product, quantity);
+    this.store.dispatch(CartActions.addToCart({ item: cartItem }));
+  }
+
+  incrementCartItemQuantity(itemId: string): void {
+    // Get current quantity from store state, not localStorage
+    this.store
+      .select(selectCartItems)
+      .pipe(take(1))
+      .subscribe((items) => {
+        const item = items.find((i) => i.id === itemId);
+        if (item) {
+          this.store.dispatch(
+            CartActions.updateCartItemQuantity({
+              itemId,
+              quantity: item.quantity + 1,
+            })
+          );
+        }
+      });
+  }
+
+  decrementCartItemQuantity(itemId: string): void {
+    // Get current quantity from store state, not localStorage
+    this.store
+      .select(selectCartItems)
+      .pipe(take(1))
+      .subscribe((items) => {
+        const item = items.find((i) => i.id === itemId);
+        if (item) {
+          if (item.quantity > 1) {
+            this.store.dispatch(
+              CartActions.updateCartItemQuantity({
+                itemId,
+                quantity: item.quantity - 1,
+              })
+            );
+          } else {
+            this.store.dispatch(CartActions.removeFromCart({ itemId }));
+          }
+        }
+      });
+  }
+
+  removeCartItem(itemId: string): void {
+    this.store.dispatch(CartActions.removeFromCart({ itemId }));
+  }
+
   createCartItemFromProduct(
     product: ProductItem,
     quantity: number = 1
@@ -97,6 +164,7 @@ export class CartService {
         images: product.images || [],
       },
       storeId: product.storeId,
+      storeTitle: product.store?.title || 'Неизвестный магазин',
     };
   }
 
@@ -108,10 +176,5 @@ export class CartService {
   // Get cart item count
   getCartItemCount(cart: OrderItem[]): number {
     return cart.reduce((total, item) => total + item.quantity, 0);
-  }
-
-  // Sync cart with NgRx store (called when store is updated)
-  syncWithStore(items: OrderItem[]): void {
-    this.saveCart(items);
   }
 }

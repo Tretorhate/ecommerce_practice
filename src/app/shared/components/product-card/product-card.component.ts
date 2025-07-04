@@ -3,12 +3,12 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
+import { map, take } from 'rxjs/operators';
+import { FavoritesService } from '../../../shared/services/favorites/favorites.service';
 import { ProductItem } from '../../models/product-item.model';
 import { OrderItem } from '../../models/order-item.model';
-import * as CartActions from '../../../store/actions/cart.actions';
-import * as CartSelectors from '../../../store/selectors/cart.selectors';
-import { CartSidebarService } from '../../services/cart-sidebar.service';
 import { CartService } from '../../services/cart/cart.service';
+import { selectCartItems } from '../../../store/selectors/cart.selectors';
 
 @Component({
   selector: 'app-product-card',
@@ -17,26 +17,35 @@ import { CartService } from '../../services/cart/cart.service';
 })
 export class ProductCardComponent implements OnInit {
   @Input() product!: ProductItem;
-  @Input() showAddToCart: boolean = false;
+  @Input() showAddToCart: boolean = true;
 
   stars = Array.from({ length: 5 });
-  isFavorite = false;
+  isFav: boolean = false;
   cartItem$!: Observable<OrderItem | undefined>;
 
   constructor(
-    private store: Store,
+    private favoritesService: FavoritesService,
     private cartService: CartService,
-    private cartSidebarService: CartSidebarService
+    private store: Store
   ) {}
 
-  ngOnInit() {
-    this.cartItem$ = this.store.select(
-      CartSelectors.selectCartItemById(this.product.id)
-    );
-  }
+  ngOnInit(): void {
+    // Use centralized favorite status check
+    this.favoritesService
+      .checkFavoriteStatus(this.product)
+      .pipe(take(1))
+      .subscribe((isFavorite) => {
+        this.isFav = isFavorite;
+      });
 
-  get productImage(): string {
-    return this.product.images?.[0] || '';
+    // Set up cart item observable - read from store
+    this.cartItem$ = this.store
+      .select(selectCartItems)
+      .pipe(
+        map((items: OrderItem[]) =>
+          items.find((item) => item.productId === this.product.id)
+        )
+      );
   }
 
   get rating(): number {
@@ -47,41 +56,51 @@ export class ProductCardComponent implements OnInit {
       (sum, review) => sum + review.rating,
       0
     );
-    return Math.round(totalRating / this.product.reviews.length);
+    return totalRating / this.product.reviews.length;
   }
 
-  onImageError(event: Event) {
+  get productImage(): string {
+    return (
+      this.product.images?.[0] ||
+      '/assets/images/categories/landscape-placeholder.svg'
+    );
+  }
+
+  toggleFavorite(): void {
+    this.favoritesService
+      .toggleFavoriteWithStoreUpdate(this.product, this.isFav)
+      .subscribe({
+        next: (newStatus) => {
+          this.isFav = newStatus;
+        },
+        error: (error: any) => {
+          console.error('Ошибка избранного:', error);
+        },
+      });
+  }
+
+  onImageError(event: Event): void {
     const target = event.target as HTMLImageElement;
-    if (target) {
-      target.style.display = 'none';
-    }
+    target.src = '/assets/images/categories/landscape-placeholder.svg';
   }
 
-  toggleFavorite() {
-    this.isFavorite = !this.isFavorite;
+  addToCart(): void {
+    this.cartService.addProductToCart(this.product, 1);
   }
 
-  addToCart() {
-    const cartItem = this.cartService.createCartItemFromProduct(this.product);
-    this.store.dispatch(CartActions.addToCart({ item: cartItem }));
-    this.cartSidebarService.openSidebar();
+  incrementQuantity(): void {
+    this.cartItem$.pipe(take(1)).subscribe((cartItem) => {
+      if (cartItem) {
+        this.cartService.incrementCartItemQuantity(cartItem.id);
+      }
+    });
   }
 
-  incrementQuantity() {
-    this.store.dispatch(
-      CartActions.updateCartItemQuantity({
-        itemId: this.product.id,
-        quantity: 1,
-      })
-    );
-  }
-
-  decrementQuantity() {
-    this.store.dispatch(
-      CartActions.updateCartItemQuantity({
-        itemId: this.product.id,
-        quantity: -1,
-      })
-    );
+  decrementQuantity(): void {
+    this.cartItem$.pipe(take(1)).subscribe((cartItem) => {
+      if (cartItem) {
+        this.cartService.decrementCartItemQuantity(cartItem.id);
+      }
+    });
   }
 }

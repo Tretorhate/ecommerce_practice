@@ -1,94 +1,169 @@
-import { Component, inject, OnInit } from '@angular/core';
-import { ProductReviewService } from '../../../../shared/services/product-review/product-review.service';
+import { Component, inject, OnInit, OnDestroy } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { CartService } from '../../../../shared/services/cart/cart.service';
+import {
+  StoreService,
+  StoreFilter,
+} from '../../../../shared/services/store.service';
 import { Store } from '@ngrx/store';
 import { ProductItem } from '../../../../shared/models/product-item.model';
 import { FavoritesService } from '../../../../shared/services/favorites/favorites.service';
 import * as CartActions from '../../../../store/actions/cart.actions';
+import * as ProductsActions from '../../../../store/actions/products.actions';
 import { CartSidebarService } from '../../../../shared/services/cart-sidebar.service';
-import { ProductService } from '../../../../shared/services/product.service';
-import { CartService } from '../../../../shared/services/cart/cart.service';
+import {
+  selectProductById,
+  selectProductsLoading,
+} from '../../../../store/selectors/products.selectors';
+import { Observable, map, filter, take, Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-product-info',
+  standalone: true,
   templateUrl: './product-info.component.html',
   imports: [CommonModule, FormsModule],
 })
-export class ProductInfoComponent implements OnInit {
-  product!: ProductItem;
+export class ProductInfoComponent implements OnInit, OnDestroy {
+  product = {
+    id: '',
+    title: '',
+    price: 0,
+    installmentPrice: 0,
+    installmentCount: 3,
+    image: '',
+    thumbnailImages: [] as string[],
+  };
+
+  stores: StoreFilter[] = [];
+  selectedStoreId: string | null = null;
   isFavorite = false;
-  selectedMainImage: string = '';
+  productData$!: Observable<ProductItem | undefined>;
+  loading$!: Observable<boolean>;
+  productId: string | null = null;
 
-  get installmentPrice(): number {
-    return Math.round(this.product.price / 3);
-  }
-
-  get installmentCount(): number {
-    return 3;
-  }
+  private destroy$ = new Subject<void>();
+  private readonly favoriteService = inject(FavoritesService);
 
   constructor(
-    private productReviewService: ProductReviewService,
+    private cartService: CartService,
+    private storeService: StoreService,
     private route: ActivatedRoute,
     private store: Store,
-    private favoritesService: FavoritesService,
-    private cartService: CartService,
-    private cartSidebarService: CartSidebarService,
-    private productService: ProductService
+    private cartSidebarService: CartSidebarService
   ) {}
 
-  ngOnInit() {
-    this.route.paramMap.subscribe((params) => {
-      const productId = params.get('id');
-      if (productId) {
-        this.productService.getProduct(productId).subscribe({
-          next: (product) => {
-            this.product = product;
-            // Set the first image as the main image
-            this.selectedMainImage = this.product?.images?.[0] || '';
-          },
-          error: (error) => {
-            console.error('Error loading product:', error);
-          },
-        });
+  ngOnInit(): void {
+    const productId = this.route.snapshot.paramMap.get('id');
+    if (!productId) return;
+
+    this.productId = productId;
+
+    this.productData$ = this.store.select(selectProductById(productId));
+    this.loading$ = this.store.select(selectProductsLoading);
+
+    this.productData$.pipe(take(1)).subscribe((product) => {
+      if (!product) {
+        // Product not in store, dispatch action to load it
+        this.store.dispatch(ProductsActions.loadProduct({ id: productId }));
       }
     });
+
+    this.productData$
+      .pipe(
+        filter(Boolean), // Only emit when product exists
+        takeUntil(this.destroy$)
+      )
+      .subscribe((data) => {
+        this.updateProductDisplay(data);
+      });
+
+    this.loadStores();
   }
 
-  changeMainImage(imageUrl: string) {
-    this.selectedMainImage = imageUrl;
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
-  onImageError(event: Event) {
-    const target = event.target as HTMLImageElement;
-    console.error('Image failed to load:', target.src);
-    if (target) {
-      target.style.display = 'none';
-    }
+  private updateProductDisplay(data: ProductItem): void {
+    this.product = {
+      id: data.id,
+      title: data.title,
+      price: data.price,
+      installmentPrice: Math.round(data.price / 3),
+      installmentCount: 3,
+      image: data.images[0],
+      thumbnailImages: data.images,
+    };
+
+    this.favoriteService
+      .checkFavoriteStatus(data)
+      .pipe(take(1))
+      .subscribe((isFavorite) => {
+        this.isFavorite = isFavorite;
+      });
   }
 
-  toggleFavorite() {
-    this.favoritesService.toggleFavorite(this.product.id).subscribe(() => {
-      this.isFavorite = !this.isFavorite;
+  changeMainImage(imageUrl: string): void {
+    this.product.image = imageUrl;
+  }
+
+  loadStores(): void {
+    if (!this.productId) return;
+
+    this.storeService
+      .getStoresForProduct(this.productId)
+      .subscribe((stores) => {
+        this.stores = stores;
+        this.selectedStoreId = stores[0]?.id || null;
+      });
+  }
+
+  addToCart(): void {
+    this.productData$.pipe(take(1)).subscribe((productData) => {
+      if (!productData) {
+        alert('Данные продукта не загружены.');
+        return;
+      }
+
+      if (!this.selectedStoreId) {
+        alert('Пожалуйста, выберите магазин.');
+        return;
+      }
+
+      const cartItem = this.cartService.createCartItemFromProduct(
+        productData,
+        1
+      );
+
+      cartItem.storeId = this.selectedStoreId;
+      const selectedStore = this.stores.find(
+        (store) => store.id === this.selectedStoreId
+      );
+      cartItem.storeTitle = selectedStore?.title || 'Неизвестный магазин';
+
+      this.store.dispatch(CartActions.addToCart({ item: cartItem }));
+
+      this.cartSidebarService.openSidebar();
     });
   }
 
-  addToCart(productId: string) {
-    const cartItem = this.cartService.createCartItemFromProduct(
-      this.product,
-      1
-    );
-    this.store.dispatch(CartActions.addToCart({ item: cartItem }));
-    this.cartSidebarService.openSidebar();
-  }
-
-  get mainImage(): string {
-    return this.selectedMainImage || this.product?.images?.[0] || '';
-  }
-
-  get thumbnailImages(): string[] {
-    return this.product?.images || [];
+  toggleFavorite(): void {
+    this.productData$.pipe(take(1)).subscribe((productData) => {
+      if (productData) {
+        this.favoriteService
+          .toggleFavoriteWithStoreUpdate(productData, this.isFavorite)
+          .subscribe({
+            next: (newStatus) => {
+              this.isFavorite = newStatus;
+            },
+            error: (err) =>
+              console.error('Ошибка при переключении избранного', err),
+          });
+      }
+    });
   }
 }
